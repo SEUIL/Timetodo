@@ -1,13 +1,13 @@
-package org.timetodo;
+package org.timetodo.time;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class TimeToDoApplicationTests {
+class TimeApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 
 }
