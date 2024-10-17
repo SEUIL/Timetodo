@@ -33,7 +33,7 @@ public class TaskEntity {
     @Column(nullable = false)
     private String status; // 진행 상태 (진행 중, 완료, 미완료)
 
-        @Column(nullable = true)
+    @Column(nullable = true)
     private String repeatType; // 반복 일정 여부
 
     @ManyToOne //여러 Task가 하나의 User와 연관 (N:1 관계)
