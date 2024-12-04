@@ -102,7 +102,7 @@ function Todo() {
 
     return (
         <div className={styles.container}>
-            <h2 className={styles.title}>할 일 목록</h2>
+            <h2>할 일 목록</h2>
             <ul className={styles.todoList}>
                 {todos.map((todo) => (
                     <li key={todo.taskId} className={styles.todoItem}>
