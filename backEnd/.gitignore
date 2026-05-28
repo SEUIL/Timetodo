@@ -5,6 +5,8 @@ target/
 !**/src/test/**/target/
 
 *.properties
+!src/main/resources/application.properties
+!.mvn/wrapper/maven-wrapper.properties
 
 ### STS ###
 .apt_generated
@@ -37,3 +39,11 @@ build/
 
 ### node ###
 node_modules/
+
+### env ###
+.env
+.env.*
+!.env.example
+client/.env
+client/.env.*
+!client/.env.example

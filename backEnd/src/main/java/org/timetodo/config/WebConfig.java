@@ -1,20 +1,32 @@
-package org.timetodo.config; // 패키지 이름을 적절히 바꿔주세요
+package org.timetodo.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    @Value("${app.cors.allowed-origins:http://localhost:3000}")
+    private String allowedOrigins;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        String[] origins = allowedOrigins.split("\\s*,\\s*");
+
         registry.addMapping("/**")
-                //.allowedOrigins("http://localhost:3000") //리액트랑 연동하려면 포트번호 3000으로 바꿔야됌, calendar 기능 사용해볼려고 임시로 바꿔뒀음!!!!!
-                .allowedOriginPatterns("*")//모든 출처 허용 (개발과정에서만 사용할것!)
+                .allowedOrigins(origins)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

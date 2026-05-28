@@ -1,7 +1,7 @@
 package org.timetodo.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.timetodo.dto.UserDTO;
 import org.timetodo.entity.CalendarEntity;
@@ -26,14 +26,14 @@ public class UserServiceImpl implements UserService {
     private final TaskRepository taskRepository;
     private final CategoryRepository categoryRepository;
     private final CalendarRepository calendarRepository;
+    private final PasswordEncoder passwordEncoder;
 
 
     public void registerUser(UserDTO userDTO) {
         // DTO에서 엔티티로 변환
         UserEntity userEntity = new UserEntity();
-        UserDTO dto = new UserDTO();
         userEntity.setUsername(userDTO.getUsername());
-        userEntity.setPassword(userDTO.getPassword());
+        userEntity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         userEntity.setEmail(userDTO.getEmail());
         // 필요시 other fields 설정
 
@@ -76,10 +76,9 @@ public class UserServiceImpl implements UserService {
     }*/
 
     @Override
-    public UserEntity authenticateUser(String username, String password) {
+    public Optional<UserEntity> authenticateUser(String username, String password) {
         return userRepository.findByUsername(username)
-                .filter(user -> user.getPassword().equals(password)) // 평문 비교
-                .orElse(null);  // 사용자 정보가 맞지 않으면 null 반환
+                .filter(user -> passwordEncoder.matches(password, user.getPassword()));
     }
 
     // 추가 기능들: 사용자 검색, 삭제 등
