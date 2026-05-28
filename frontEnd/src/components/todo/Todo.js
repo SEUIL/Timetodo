@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FaEdit } from 'react-icons/fa'; // 수정 아이콘 추가
+import { FaEdit } from 'react-icons/fa';
 import styles from './Todo.module.css';
 import AddModal from '../add/AddModal';
 import TodoEditModal from '../edit/TodoEditModal'; // 수정 모달 추가
@@ -109,30 +109,34 @@ function Todo() {
 
     return (
         <div className={styles.container}>
-            <h2>할 일 목록</h2>
+            <header className={styles.header}>
+                <div>
+                    <span className={styles.eyebrow}>Tasks</span>
+                    <h2>할 일 목록</h2>
+                </div>
+                <button onClick={() => setShowModal(true)} className={styles.addButton}>
+                    할 일 추가하기
+                </button>
+            </header>
+
             <ul className={styles.todoList}>
                 {todos.map((todo) => (
                     <li key={todo.taskId} className={styles.todoItem}>
                         <div className={styles.todoDetails}>
-                            <span>{todo.title || '제목 없음'}</span>
+                            <span className={styles.todoTitle}>{todo.title || '제목 없음'}</span>
                             <div className={styles.metadata}>
-                                {todo.dueDate && <span>📅 {new Date(todo.dueDate).toLocaleString()}</span>}
+                                {todo.dueDate && <span className={styles.metaItem}>{new Date(todo.dueDate).toLocaleString()}</span>}
                                 {todo.label && (
                                     <span
+                                        className={styles.label}
                                         style={{
                                             backgroundColor: todo.labelColor,
-                                            color: '#ffffff',
-                                            padding: '2px 6px',
-                                            borderRadius: '12px',
-                                            fontSize: '0.8em',
-                                            marginLeft: '8px',
-                                            display: 'inline-block',
                                         }}
                                     >
                                         {todo.label}
                                     </span>
                                 )}
-                                {todo.priority && <span>⚡ {todo.priority}</span>}
+                                {todo.priority && <span className={styles.metaItem}>{todo.priority}</span>}
                                 <span
                                     className={`${styles.status} ${
                                         todo.status === "보류 중"
@@ -148,11 +152,10 @@ function Todo() {
                                 >
                                     {todo.status}
                                 </span>
-                                {/* 수정 아이콘 */}
                                 <FaEdit
                                     className={styles.editIcon}
                                     onClick={(e) => {
-                                        e.stopPropagation(); // 부모 이벤트 전파 방지
+                                        e.stopPropagation();
                                         handleTodoClick(todo);
                                     }}
                                 />
@@ -161,10 +164,6 @@ function Todo() {
                     </li>
                 ))}
             </ul>
-
-            <button onClick={() => setShowModal(true)} className={styles.addButton}>
-                할 일 추가하기
-            </button>
 
             {/* AddModal */}
             <AddModal

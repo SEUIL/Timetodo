@@ -1,14 +1,42 @@
-.dashBoard{
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
+.page {
+    max-width: 1320px;
+    margin: 0 auto;
 }
 
-.TodoContainer{
-    flex: 1;
-    margin-right: 20px;
+.header {
+    margin-bottom: 28px;
 }
 
-.CalendarContainer{
-    flex: 1;
+.eyebrow {
+    display: block;
+    margin-bottom: 8px;
+    color: #2563eb;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.header h1 {
+    margin: 0;
+    color: #111827;
+    font-size: 36px;
+    line-height: 1.25;
+}
+
+.dashBoard {
+    display: grid;
+    grid-template-columns: minmax(420px, 0.95fr) minmax(520px, 1.05fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.TodoContainer,
+.CalendarContainer {
+    min-width: 0;
+}
+
+@media (max-width: 1180px) {
+    .dashBoard {
+        grid-template-columns: 1fr;
+    }
 }

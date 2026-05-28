@@ -10,7 +10,7 @@
 
 ```text
 Timetodo/
-  README.txt
+  README.md
   frontEnd/
   backEnd/
   docs/
@@ -21,7 +21,7 @@ Timetodo/
 | 프론트엔드 | `frontEnd/` | Create React App 기반 React 앱 |
 | 백엔드 | `backEnd/` | Spring Boot, Maven, JPA, MySQL |
 | 문서 | `docs/` | 진단 결과, 인계 계획, 개발 기록 |
-| 루트 README | `README.txt` | 기존 위치 유지 |
+| 루트 README | `README.md` | 포트폴리오용 최종 README |
 
 ## 현재 검증된 상태
 
@@ -139,4 +139,3 @@ Timetodo 프로젝트의 1차 진단 문서를 기준으로 코드 리뷰를 진
 2. 사용자가 우선순위를 확인한다.
 3. 수정 범위가 작으면 Codex에서 바로 처리한다.
 4. 범위가 넓으면 이 문서와 1차 진단 문서를 OpenCode에 넘긴다.
-

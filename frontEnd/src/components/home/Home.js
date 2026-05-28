@@ -16,11 +16,12 @@ function Home() {
     // endregion
 
         return (
-            <>
-                {/*제목 : 현재 날짜*/}
-                <h1>{formattedDate}</h1>
+            <section className={styles.page}>
+                <header className={styles.header}>
+                    <span className={styles.eyebrow}>Today</span>
+                    <h1>{formattedDate}</h1>
+                </header>
 
-                {/* 대시보드 영역 */}
                 <div className={styles.dashBoard}>
                     <div className={styles.TodoContainer}>
                         <TodayTodo/>
@@ -30,7 +31,7 @@ function Home() {
                         <TodayCalendar/>
                     </div>
                 </div>
-            </>
+            </section>
         );
 
     }

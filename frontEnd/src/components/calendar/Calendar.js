@@ -145,32 +145,40 @@ function Calendar() {
 
     return (
         <div className={styles.calendarContainer}>
-            <div className={styles.viewSelector}>
-                <label htmlFor="view-select">보기: </label>
-                <select id="view-select" onChange={handleViewChange}>
-                    <option value="dayGridMonth">월간 보기</option>
-                    <option value="timeGridWeek">주간 보기</option>
-                    <option value="timeGridDay">일간 보기</option>
-                </select>
-            </div>
+            <header className={styles.header}>
+                <div>
+                    <span className={styles.eyebrow}>Calendar</span>
+                    <h2>캘린더</h2>
+                </div>
+                <div className={styles.viewSelector}>
+                    <label htmlFor="view-select">보기</label>
+                    <select id="view-select" onChange={handleViewChange}>
+                        <option value="dayGridMonth">월간</option>
+                        <option value="timeGridWeek">주간</option>
+                        <option value="timeGridDay">일간</option>
+                    </select>
+                </div>
+            </header>
 
-            <FullCalendar
-                ref={calendarRef}
-                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                initialView="dayGridMonth"
-                events={events}
-                dateClick={handleDateClick}
-                eventClick={handleEventClick}
-                headerToolbar={{
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: '',
-                }}
-                locale="ko"
-                editable={true}
-                selectable={true}
-                height="100%"
-            />
+            <div className={styles.calendarPanel}>
+                <FullCalendar
+                    ref={calendarRef}
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                    initialView="dayGridMonth"
+                    events={events}
+                    dateClick={handleDateClick}
+                    eventClick={handleEventClick}
+                    headerToolbar={{
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: '',
+                    }}
+                    locale="ko"
+                    editable={true}
+                    selectable={true}
+                    height="100%"
+                />
+            </div>
 
             {/* 추가 모달 */}
             <AddModal

@@ -47,7 +47,10 @@ function TodayCalendar() {
                     };
                 });
 
-                setEvents(fullCalendarEvents);
+                const today = new Date().toLocaleDateString('en-CA');
+                setEvents(fullCalendarEvents.filter((event) => {
+                    return new Date(event.start).toLocaleDateString('en-CA') === today;
+                }));
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -117,25 +120,37 @@ function TodayCalendar() {
     };
 
     return (
-        <div className={styles.calendarContainer}>
-            <FullCalendar
-                ref={calendarRef}
-                plugins={[timeGridPlugin, interactionPlugin]}
-                initialView="timeGridDay" // 일간 보기 설정
-                events={events}
-                dateClick={handleDateClick}
-                eventClick={handleEventClick}
-                headerToolbar={{
-                    left: '',
-                    center: '',
-                    right: '', // 보기 전환 버튼 제거
-                }}
-                locale="ko"
-                editable={true}
-                selectable={true}
-                height="100%"
-                initialDate={new Date()} // 오늘 날짜만 표시
-            />
+        <div className={styles.calendarCard}>
+            <div className={styles.header}>
+                <div>
+                    <span className={styles.eyebrow}>Today Calendar</span>
+                    <h2>오늘 일정</h2>
+                </div>
+                <span className={styles.count}>{events.length}</span>
+            </div>
+
+            <div className={styles.calendarContainer}>
+                <FullCalendar
+                    ref={calendarRef}
+                    plugins={[timeGridPlugin, interactionPlugin]}
+                    initialView="timeGridDay" // 일간 보기 설정
+                    events={events}
+                    dateClick={handleDateClick}
+                    eventClick={handleEventClick}
+                    headerToolbar={{
+                        left: '',
+                        center: '',
+                        right: '', // 보기 전환 버튼 제거
+                    }}
+                    locale="ko"
+                    editable={true}
+                    selectable={true}
+                    height="100%"
+                    initialDate={new Date()} // 오늘 날짜만 표시
+                    slotMinTime="08:00:00"
+                    slotMaxTime="20:00:00"
+                />
+            </div>
 
             {/* 추가 모달 */}
             <AddModal

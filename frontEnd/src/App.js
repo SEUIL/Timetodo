@@ -50,6 +50,15 @@ function App() {
         return null;
     }
 
+    const renderAuthedPage = (children) => (
+        <div className={styles.appShell}>
+            <Sidebar onAddEvent={addEvent} onLogout={handleLogout} />
+            <main className={styles.mainContent}>
+                {children}
+            </main>
+        </div>
+    );
+
     return (
         <>
             <Router>
@@ -62,47 +71,19 @@ function App() {
                         <>
                             <Route
                                 path="/home"
-                                element={
-                                    <div style={{ display: 'flex' }}>
-                                        <Sidebar onAddEvent={addEvent} onLogout={handleLogout} />
-                                        <div style={{ flex: 1, padding: '20px' }}>
-                                            <Home />
-                                        </div>
-                                    </div>
-                                }
+                                element={renderAuthedPage(<Home />)}
                             />
                             <Route
                                 path="/calendar"
-                                element={
-                                    <div style={{ display: 'flex' }}>
-                                        <Sidebar onAddEvent={addEvent} onLogout={handleLogout} />
-                                        <div style={{ flex: 1, padding: '20px' }}>
-                                            <Calendar events={events} />
-                                        </div>
-                                    </div>
-                                }
+                                element={renderAuthedPage(<Calendar events={events} />)}
                             />
                             <Route
                                 path="/todo"
-                                element={
-                                    <div style={{ display: 'flex' }}>
-                                        <Sidebar onAddEvent={addEvent} onLogout={handleLogout} />
-                                        <div style={{ flex: 1, padding: '20px' }}>
-                                            <Todo />
-                                        </div>
-                                    </div>
-                                }
+                                element={renderAuthedPage(<Todo />)}
                             />
                             <Route
                                 path="/stats"
-                                element={
-                                    <div style={{ display: 'flex' }}>
-                                        <Sidebar onAddEvent={addEvent} onLogout={handleLogout} />
-                                        <div style={{ flex: 1, padding: '20px' }}>
-                                            <TTDStats />
-                                        </div>
-                                    </div>
-                                }
+                                element={renderAuthedPage(<TTDStats />)}
                             />
                         </>
                     ) : (

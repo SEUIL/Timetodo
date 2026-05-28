@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaHome, FaCalendarAlt, FaClipboardList, FaChartBar, FaChevronDown, FaPlus} from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie'; // 쿠키 관리 라이브러리
 
 import Profile from './Profile';
@@ -52,9 +52,11 @@ const Sidebar = ({ onAddEvent, onLogout }) => {
 
             {/* 사용자 프로필 섹션 */}
             <div className={styles.profileSection} onClick={toggleProfile}>
-                <img src="https://via.placeholder.com/50" alt="profile" className={styles.profileImage}/>
+                <div className={styles.profileImage}>
+                    {(username || 'T').slice(0, 1).toUpperCase()}
+                </div>
                 <div className={styles.profileInfo}>
-                    {/* userID를 바로 표시 */}
+                    <span className={styles.profileLabel}>Workspace</span>
                     <span className={styles.username}>
                         {username ? `${username}` : '로그인해주세요'}
                     </span>
@@ -80,24 +82,24 @@ const Sidebar = ({ onAddEvent, onLogout }) => {
             <nav className={styles.menu}>
                 <ul>
                     <li>
-                        <Link to="/home" className={styles.menuLink}>
+                        <NavLink to="/home" className={({ isActive }) => `${styles.menuLink} ${isActive ? styles.active : ''}`}>
                             <FaHome className={styles.menuIcon}/> 홈
-                        </Link>
+                        </NavLink>
                     </li>
                     <li>
-                        <Link to="/calendar" className={styles.menuLink}>
+                        <NavLink to="/calendar" className={({ isActive }) => `${styles.menuLink} ${isActive ? styles.active : ''}`}>
                             <FaCalendarAlt className={styles.menuIcon}/> 캘린더
-                        </Link>
+                        </NavLink>
                     </li>
                     <li>
-                        <Link to="/todo" className={styles.menuLink}>
+                        <NavLink to="/todo" className={({ isActive }) => `${styles.menuLink} ${isActive ? styles.active : ''}`}>
                             <FaClipboardList className={styles.menuIcon}/> 할 일
-                        </Link>
+                        </NavLink>
                     </li>
                     <li>
-                        <Link to="/stats" className={styles.menuLink}>
+                        <NavLink to="/stats" className={({ isActive }) => `${styles.menuLink} ${isActive ? styles.active : ''}`}>
                             <FaChartBar className={styles.menuIcon}/> 통계
-                        </Link>
+                        </NavLink>
                     </li>
                 </ul>
             </nav>
