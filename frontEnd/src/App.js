@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/sidebar/Sidebar';
 import Home from './components/home/Home';
@@ -10,14 +10,31 @@ import SignUp from './components/signup/SignUp';
 import Profile from './components/sidebar/Profile';
 import Chatbot from './components/ai/Chatbot';
 import styles from './App.module.css';
+import api from './api/client';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAuthChecked, setIsAuthChecked] = useState(false);
     const [events, setEvents] = useState([]);
     const [showChatbot, setShowChatbot] = useState(false);
 
+    useEffect(() => {
+        api.get('/api/user/me')
+            .then(() => setIsAuthenticated(true))
+            .catch(() => setIsAuthenticated(false))
+            .finally(() => setIsAuthChecked(true));
+    }, []);
+
     const handleLoginSuccess = () => {
         setIsAuthenticated(true); // 로그인 성공 시 true로 변경
+    };
+
+    const handleLogout = async () => {
+        try {
+            await api.post('/api/user/logout');
+        } finally {
+            setIsAuthenticated(false);
+        }
     };
 
     // 새 일정을 추가하는 함수
@@ -28,6 +45,10 @@ function App() {
         };
         setEvents((prevEvents) => [...prevEvents, newEvent]); // 새 이벤트 추가
     };
+
+    if (!isAuthChecked) {
+        return null;
+    }
 
     return (
         <>
@@ -43,7 +64,7 @@ function App() {
                                 path="/home"
                                 element={
                                     <div style={{ display: 'flex' }}>
-                                        <Sidebar onAddEvent={addEvent} />
+                                        <Sidebar onAddEvent={addEvent} onLogout={handleLogout} />
                                         <div style={{ flex: 1, padding: '20px' }}>
                                             <Home />
                                         </div>
@@ -54,7 +75,7 @@ function App() {
                                 path="/calendar"
                                 element={
                                     <div style={{ display: 'flex' }}>
-                                        <Sidebar onAddEvent={addEvent} />
+                                        <Sidebar onAddEvent={addEvent} onLogout={handleLogout} />
                                         <div style={{ flex: 1, padding: '20px' }}>
                                             <Calendar events={events} />
                                         </div>
@@ -65,7 +86,7 @@ function App() {
                                 path="/todo"
                                 element={
                                     <div style={{ display: 'flex' }}>
-                                        <Sidebar onAddEvent={addEvent} />
+                                        <Sidebar onAddEvent={addEvent} onLogout={handleLogout} />
                                         <div style={{ flex: 1, padding: '20px' }}>
                                             <Todo />
                                         </div>
@@ -76,7 +97,7 @@ function App() {
                                 path="/stats"
                                 element={
                                     <div style={{ display: 'flex' }}>
-                                        <Sidebar onAddEvent={addEvent} />
+                                        <Sidebar onAddEvent={addEvent} onLogout={handleLogout} />
                                         <div style={{ flex: 1, padding: '20px' }}>
                                             <TTDStats />
                                         </div>

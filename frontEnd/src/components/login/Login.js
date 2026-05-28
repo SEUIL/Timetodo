@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 
 import styles from './Login.module.css';
 
-import axios from 'axios';
+import api from '../../api/client';
 
 
 
@@ -18,7 +18,7 @@ function Login({ onLoginSuccess }) {
 
         try {
             // 백엔드로 로그인 요청 보내기
-            const response = await axios.post('/api/user/login', {
+            const response = await api.post('/api/user/login', {
                 username,
                 password,
             });

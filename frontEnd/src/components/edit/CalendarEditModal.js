@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
-import axios from "axios";
+import api from '../../api/client';
 import ReactDatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FaTimes, FaTag, FaSyncAlt, FaClipboardList, FaClock } from 'react-icons/fa';
@@ -36,7 +36,7 @@ function CalendarEditModal({ isOpen, onRequestClose, onSave, onDelete, selectedE
         if (isOpen) {
             const fetchLabels = async () => {
                 try {
-                    const response = await axios.get("/api/categories/all");
+                    const response = await api.get("/api/categories/all");
                     const categories = response.data || [];
                     const formattedCategories = categories.map((category) => ({
                         id: category.categoryId,
@@ -95,14 +95,9 @@ function CalendarEditModal({ isOpen, onRequestClose, onSave, onDelete, selectedE
 
         try {
             // 서버로 업데이트 요청
-            const response = await axios.put(
+            const response = await api.put(
                 `/api/calendar/update?categoryId=${encodeURIComponent(selectedCategoryId)}`, // 엔드포인트
-                eventData, // 요청 본문
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
+                eventData // 요청 본문
             );
 
             console.log("Update response:", response.data);
@@ -138,11 +133,8 @@ function CalendarEditModal({ isOpen, onRequestClose, onSave, onDelete, selectedE
         if (window.confirm("정말로 삭제하시겠습니까?")) {
             try {
                 // 서버로 삭제 요청
-                await axios.delete("/api/calendar/delete", {
+                await api.delete("/api/calendar/delete", {
                     data: selectedEvent.id, // 요청 본문으로 전달
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
                 });
                 onDelete(selectedEvent.id);
 

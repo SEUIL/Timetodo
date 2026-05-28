@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/client";
 
 function ScheduleList() {
     const [schedules, setSchedules] = useState([]);
 
     useEffect(() => {
         const fetchSchedules = async () => {
-            const response = await axios.get("/api/schedule/list"); // 백엔드 API 호출
+            const response = await api.get("/api/calendar/find"); // 백엔드 API 호출
             setSchedules(response.data); // 일정 리스트를 상태에 저장
         };
         fetchSchedules();
@@ -16,7 +16,7 @@ function ScheduleList() {
         <ul>
             {schedules.map((schedule) => (
                 <li key={schedule.id}>
-                    {schedule.title} - {schedule.date} {schedule.time}
+                    {schedule.title} - {schedule.startTime}
                 </li>
             ))}
         </ul>

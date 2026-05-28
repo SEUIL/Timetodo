@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
-import axios from "axios";
+import api from '../../api/client';
 import ReactDatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FaTimes, FaExclamationCircle, FaHourglass, FaTag, FaSyncAlt } from 'react-icons/fa';
@@ -59,14 +59,9 @@ function TodoEditModal({ isOpen, onRequestClose, onSave, onDelete, task, labelOp
 
         try {
             // 서버로 업데이트 요청
-            const response = await axios.put(
+            const response = await api.put(
                 `/api/task/update?categoryId=${encodeURIComponent(selectedCategoryId)}`, // 경로 변수 및 쿼리 파라미터 포함
-                taskData, // 요청 본문
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
+                taskData // 요청 본문
             );
 
             console.log("Update response:", response.data);
@@ -98,11 +93,8 @@ function TodoEditModal({ isOpen, onRequestClose, onSave, onDelete, task, labelOp
         }
         if (window.confirm('정말로 이 할 일을 삭제하시겠습니까?')) {
             try {
-                await axios.delete("/api/task/delete", {
+                await api.delete("/api/task/delete", {
                     data: task.taskId,
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
                 });
                 onDelete(task.taskId);
                 onRequestClose();

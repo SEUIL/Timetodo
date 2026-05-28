@@ -2,8 +2,9 @@ package org.timetodo.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import org.timetodo.dto.TaskDto;
 import org.timetodo.dto.TaskRequestDto;
 import org.timetodo.entity.CategoryEntity;
@@ -22,20 +23,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor // 의존성 주입을 위한 생성자 자동 생성
 public class TaskService{
 
-    @Autowired
     private final TaskRepository taskRepository; // TaskRepository 주입
 
-    @Autowired
     private final UserRepository userRepository;  // UserRepository 주입
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
     public TaskDto addTask(TaskRequestDto taskRequestDto, Long userId, Long categoryId) {
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID(테스크 서비스) : " + userId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
         CategoryEntity category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found with ID(테스크 서비스) : " + categoryId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "카테고리를 찾을 수 없습니다."));
+        validateCategoryOwner(category, userId);
 
         log.info("TaskSevice > addTask메소드 > userId, categoryId 정보 : " + userId + " , " + categoryId); //로그
 
@@ -133,7 +132,7 @@ public class TaskService{
     public List<TaskDto> getTasksByUserId(Long userId) {
         // User 엔티티를 조회
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
 
         // 사용자와 연관된 할 일 엔티티 조회
         List<TaskEntity> tasks = taskRepository.findAllByUserId(user);
@@ -142,13 +141,16 @@ public class TaskService{
         return tasks.stream().map(this::convertTask).collect(Collectors.toList());
     }
 
-    public TaskEntity updateTask(TaskRequestDto taskRequestDto, Long categoryId) {
+    public TaskDto updateTask(TaskRequestDto taskRequestDto, Long categoryId, Long userId) {
         Long taskId = taskRequestDto.getTaskId();
         // 기존 할 일 조회
         TaskEntity existingTask = taskRepository.findById(taskId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 할 일이 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 할 일이 없습니다."));
+        validateTaskOwner(existingTask, userId);
+
         CategoryEntity category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("할당된 카테고리 ID가 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "할당된 카테고리 ID가 없습니다."));
+        validateCategoryOwner(category, userId);
 
         // 기존 할 일을 새로운 데이터로 업데이트
         existingTask.setTitle(taskRequestDto.getTitle());
@@ -158,13 +160,14 @@ public class TaskService{
         existingTask.setRepeatType(taskRequestDto.getRepeatType());
         existingTask.setCategoryId(category);
 
-        return taskRepository.save(existingTask); // 업데이트 후 저장
+        return convertTask(taskRepository.save(existingTask)); // 업데이트 후 저장
     }
 
-    public void updateTaskStatus(Long taskId, String status) {
+    public void updateTaskStatus(Long taskId, String status, Long userId) {
         // 기존 할 일 조회
         TaskEntity existingTask = taskRepository.findById(taskId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 할 일이 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 할 일이 없습니다."));
+        validateTaskOwner(existingTask, userId);
 
         // 상태 업데이트
         existingTask.setStatus(status);
@@ -175,8 +178,23 @@ public class TaskService{
 
 
 
-    public void deleteTask(Long id) {
+    public void deleteTask(Long id, Long userId) {
         // 특정 할 일 삭제
-        taskRepository.deleteById(id);
+        TaskEntity existingTask = taskRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 할 일이 없습니다."));
+        validateTaskOwner(existingTask, userId);
+        taskRepository.delete(existingTask);
+    }
+
+    private void validateTaskOwner(TaskEntity task, Long userId) {
+        if (task.getUserId() == null || !userId.equals(task.getUserId().getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 할 일에 접근할 수 없습니다.");
+        }
+    }
+
+    private void validateCategoryOwner(CategoryEntity category, Long userId) {
+        if (category.getUserId() == null || !userId.equals(category.getUserId().getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 카테고리에 접근할 수 없습니다.");
+        }
     }
 }

@@ -7,23 +7,19 @@ import Profile from './Profile';
 import AddModal from '../add/AddModal';
 import styles from './Sidebar.module.css';
 
-const Sidebar = ({ onAddEvent }) => {
+const Sidebar = ({ onAddEvent, onLogout }) => {
     const [isProfileVisible, setProfileVisible] = useState(false);
     const [isModalOpen, setModalOpen] = useState(false);
     const navigate = useNavigate();
 
     const [username, setUsername] = useState('');
-    const [userId, setUserId] = useState('');
 
     useEffect(() => {
-        // 쿠키에서 userId와 username 읽기
-        const storedUserId = Cookies.get('userId'); // userId 읽기
+        // 쿠키에서 화면 표시용 username만 읽기
         const storedUsername = Cookies.get('username'); // username 읽기
 
-        console.log("쿠키에서 읽은 userId:", storedUserId);
         console.log("쿠키에서 읽은 username:", storedUsername);
 
-        if (storedUserId) setUserId(storedUserId); // 상태에 저장
         if (storedUsername) setUsername(storedUsername); // 상태에 저장
     }, []);
 
@@ -31,9 +27,10 @@ const Sidebar = ({ onAddEvent }) => {
         setProfileVisible(!isProfileVisible);
     };
 
-    const handleLogout = () => {
-        // 로그아웃 시 쿠키 제거
-
+    const handleLogout = async () => {
+        if (onLogout) {
+            await onLogout();
+        }
         navigate("/login");
     };
 

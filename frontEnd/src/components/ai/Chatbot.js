@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './Chatbot.module.css';
-import axios from "axios";
+import api from '../../api/client';
 
 function Chatbot(userId) {
     const [messages, setMessages] = useState([]); // 대화 메시지 목록
@@ -22,7 +22,7 @@ function Chatbot(userId) {
 
         try {
             // OpenAI API 호출
-            const response = await axios.post('/api/chat/add', {
+            const response = await api.post('/api/chat/add', {
                 inputText: inputMessage, // 사용자가 입력한 메시지
             });
 

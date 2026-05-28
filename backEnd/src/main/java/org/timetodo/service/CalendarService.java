@@ -2,7 +2,7 @@ package org.timetodo.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import org.timetodo.dto.CalendarDTO;
@@ -14,6 +14,7 @@ import org.timetodo.entity.UserEntity;
 import org.timetodo.repository.CalendarRepository;
 import org.timetodo.repository.CategoryRepository;
 import org.timetodo.repository.UserRepository;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,19 +25,17 @@ import java.util.stream.Collectors;
 @Service
 public class CalendarService {
 
-    @Autowired
     private final CalendarRepository calendarRepository; // CalendarRepository 주입
-    @Autowired
     private final UserRepository userRepository;  // UserRepository 주입
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
     // 새로운 일정을 추가 (반복일정 로직추가 11/11)
     public CalendarDTO addCalendar(CalendarRequestDto calendarRequestDto, Long userId, Long categoryId) {
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID(캘린더서비스) : " + userId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
         CategoryEntity category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found with ID(캘린더 서비스) : " + categoryId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "카테고리를 찾을 수 없습니다."));
+        validateCategoryOwner(category, userId);
 
 
         log.info("CalendarSevice > addCalendar메소드 > userId, categoryId 정보 : " + userId + " , " + categoryId); //로그
@@ -116,7 +115,7 @@ public class CalendarService {
     public List<CalendarDTO> getCalendarsByUserId(Long userId) {
         // User 엔티티를 조회
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
 
         // 사용자와 연관된 캘린더 엔티티 조회
         List<CalendarEntity> calendars = calendarRepository.findByUserId(user);
@@ -126,13 +125,16 @@ public class CalendarService {
     }
 
     // 특정 일정을 업데이트
-    public CalendarEntity updateCalendar(CalendarRequestDto calendarRequestDto, Long categoryId) {
+    public CalendarDTO updateCalendar(CalendarRequestDto calendarRequestDto, Long categoryId, Long userId) {
         Long calendarId = calendarRequestDto.getCalendarId();
         // 기존 일정 조회
         CalendarEntity existingCalendar = calendarRepository.findById(calendarId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 일정이 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 일정이 없습니다."));
+        validateCalendarOwner(existingCalendar, userId);
+
         CategoryEntity category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("할당된 카테고리 ID가 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "할당된 카테고리 ID가 없습니다."));
+        validateCategoryOwner(category, userId);
         // 기존 일정을 새로운 데이터로 업데이트
         existingCalendar.setTitle(calendarRequestDto.getTitle());
         existingCalendar.setDescription(calendarRequestDto.getDescription());
@@ -142,23 +144,42 @@ public class CalendarService {
         existingCalendar.setRepeatType(calendarRequestDto.getRepeatType());
         existingCalendar.setCategoryId(category);
 
-        return calendarRepository.save(existingCalendar); // 업데이트 후 저장
+        return convertToDto(calendarRepository.save(existingCalendar)); // 업데이트 후 저장
     }
 
     // 특정 일정을 삭제
-    public void deleteCalendar(Long id) {
+    public void deleteCalendar(Long id, Long userId) {
         // 특정 일정 삭제
-        calendarRepository.deleteById(id);
+        CalendarEntity calendar = calendarRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 일정이 없습니다."));
+        validateCalendarOwner(calendar, userId);
+        calendarRepository.delete(calendar);
     }
 
     // 일정 검색 엔드포인트
-    public List<CalendarEntity> searchEvents(String title, String description, Long categoryId, LocalDateTime startTime) {
+    public List<CalendarDTO> searchEvents(String title, String description, Long categoryId, LocalDateTime startTime, Long userId) {
         CategoryEntity category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid category ID"));
+        validateCategoryOwner(category, userId);
 
         return calendarRepository.findByTitleContainingAndDescriptionContainingAndCategoryIdAndStartTime(
                 title, description, category, startTime
-        );
+        ).stream()
+                .filter(calendar -> calendar.getUserId() != null && userId.equals(calendar.getUserId().getUserId()))
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    private void validateCalendarOwner(CalendarEntity calendar, Long userId) {
+        if (calendar.getUserId() == null || !userId.equals(calendar.getUserId().getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 일정에 접근할 수 없습니다.");
+        }
+    }
+
+    private void validateCategoryOwner(CategoryEntity category, Long userId) {
+        if (category.getUserId() == null || !userId.equals(category.getUserId().getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 카테고리에 접근할 수 없습니다.");
+        }
     }
 
 

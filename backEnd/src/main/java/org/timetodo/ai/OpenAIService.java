@@ -401,10 +401,10 @@ public class OpenAIService { //사용자 입력 파실 및 처리
 
             // Task 또는 Calendar에 대한 알림 생성
             if ("task".equalsIgnoreCase(type)) {
-                reminderService.createTaskReminder(reminderRequestDto, id);
+                reminderService.createTaskReminder(reminderRequestDto, id, userId);
                 log.info("Reminder created for Task ID: {}", id);
             } else if ("calendar".equalsIgnoreCase(type)) {
-                reminderService.createCalendarReminder(reminderRequestDto, id);
+                reminderService.createCalendarReminder(reminderRequestDto, id, userId);
                 log.info("Reminder created for Calendar ID: {}", id);
             } else {
                 throw new IllegalArgumentException("Invalid selection type: " + type);

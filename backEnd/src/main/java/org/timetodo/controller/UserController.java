@@ -9,12 +9,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.timetodo.auth.CurrentUserService;
 import org.timetodo.dto.UserDTO;
 import org.timetodo.entity.UserEntity;
 import org.timetodo.service.UserServiceImpl;
 import jakarta.servlet.http.HttpSession;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -45,7 +47,7 @@ public class UserController {
 
     // 로그인 엔드포인트 추가
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody UserDTO userDTO, HttpServletResponse response) {
+    public ResponseEntity<String> loginUser(@RequestBody UserDTO userDTO, HttpServletResponse response, HttpSession session) {
 
         // 사용자 인증 로직
         Optional<UserEntity> authenticatedUser = userService.authenticateUser(userDTO.getUsername(), userDTO.getPassword());
@@ -55,6 +57,7 @@ public class UserController {
         }
 
         UserEntity user = authenticatedUser.get();
+        session.setAttribute(CurrentUserService.SESSION_USER_ID, user.getUserId());
 
         // userId 쿠키 설정
         ResponseCookie userIdCookie = ResponseCookie.from("userId", String.valueOf(user.getUserId()))
@@ -89,5 +92,12 @@ public class UserController {
         return ResponseEntity.ok("Logout successful");
     }
 
-    // 추가 기능 필요 시 여기에 작성 (예: 로그인, 사용자 정보 조회 등)
+    @GetMapping("/me")
+    public ResponseEntity<?> currentUser(HttpSession session) {
+        Object userId = session.getAttribute(CurrentUserService.SESSION_USER_ID);
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
+        return ResponseEntity.ok(Map.of("userId", userId));
+    }
 }

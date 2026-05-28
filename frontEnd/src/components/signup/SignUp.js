@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios'; // axios를 사용하여 서버로 데이터를 보냅니다.
+import api from '../../api/client';
 import styles from './SignUp.module.css';
 import { Link } from 'react-router-dom'; // 페이지 이동을 위한 Link 컴포넌트
 
@@ -21,7 +21,7 @@ function SignUp() {
         e.preventDefault();
         try {
             // 백엔드로 POST 요청을 보내는 코드
-            const response = await axios.post('/api/user/signup', formData);
+            const response = await api.post('/api/user/signup', formData);
             console.log(response.data); // 성공 시 백엔드에서의 응답 확인
             alert('회원가입이 성공적으로 완료되었습니다.');
         } catch (error) {

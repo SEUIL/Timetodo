@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
-import axios from "axios";
+import api from '../../api/client';
 import ReactDatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FaTimes, FaBell, FaExclamationCircle, FaClipboardList, FaSyncAlt, FaClock, FaHourglass, FaTag } from 'react-icons/fa';
@@ -40,7 +40,7 @@ function AddModal({ isOpen, onRequestClose, onSave, defaultTab }) {
         if (isOpen) {
             const fetchLabels = async () => {
                 try {
-                    const response = await axios.get("/api/categories/all");
+                    const response = await api.get("/api/categories/all");
                     const categories = response.data || [];
                     const formattedCategories = categories.map((category) => ({
                         id: category.categoryId, // 카테고리 ID
@@ -74,7 +74,7 @@ function AddModal({ isOpen, onRequestClose, onSave, defaultTab }) {
                 return;
             }
 
-            const response = await axios.post("/api/categories/add", {
+            const response = await api.post("/api/categories/add", {
                 categoryName: newLabel.name.trim(),
                 color: newLabel.color,
             });
@@ -133,14 +133,8 @@ function AddModal({ isOpen, onRequestClose, onSave, defaultTab }) {
         };
 
         try {
-            const response = await fetch('http://localhost:8085/api/task/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newTask),
-                credentials: "include"
-            });
-
-            const savedTask = await response.json();
+            const response = await api.post('/api/task/add', newTask);
+            const savedTask = response.data;
             if (!savedTask) {
                 throw new Error('응답 데이터가 없습니다.');
             }
@@ -206,18 +200,8 @@ function AddModal({ isOpen, onRequestClose, onSave, defaultTab }) {
         };
 
         try {
-            const response = await fetch('http://localhost:8085/api/calendar/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newEvent),
-                credentials: "include"
-            });
-
-
-
-
-
-            const savedEvent = await response.json();
+            const response = await api.post('/api/calendar/add', newEvent);
+            const savedEvent = response.data;
             if (!savedEvent) {
                 throw new Error('응답 데이터가 없습니다.');
             }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./SettingsModal.module.css";
 import DarkModeSwitch from "./DarkModeSwitch";
-import axios from "axios";
+import api from "../../api/client";
 
 const SettingsModal = ({ isOpen, onClose, children }) => {
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -9,7 +9,7 @@ const SettingsModal = ({ isOpen, onClose, children }) => {
     // 다크모드 상태를 서버에서 불러오기
     useEffect(() => {
         if (isOpen) {
-            axios
+            api
                 .get("/api/preferences")
                 .then((response) => {
                     if (response.status === 200 && response.data.theme) {
@@ -24,7 +24,7 @@ const SettingsModal = ({ isOpen, onClose, children }) => {
 
     // 다크모드 상태를 서버에 저장
     const saveThemeToServer = (theme) => {
-        axios
+        api
             .post("/api/preferences", { theme })
             .then(() => {
                 console.log("다크모드 상태가 저장되었습니다.");

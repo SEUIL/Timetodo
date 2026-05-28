@@ -1,16 +1,17 @@
 package org.timetodo.ai.log;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.timetodo.dto.LogDto;
 import org.timetodo.entity.LogEntity;
 import org.timetodo.repository.LogRepository;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class LogService {
-    @Autowired
-    private LogRepository logRepository;
+    private final LogRepository logRepository;
 
     public void saveLog(Long userId, String input, String response, String result) {
         LogEntity log = new LogEntity();
@@ -21,13 +22,20 @@ public class LogService {
         logRepository.save(log);
     }
 
-    public List<LogEntity> getAllLogs() {
-        return logRepository.findAll(); // 모든 로그 조회
+    public List<LogDto> getLogsByUserId(Long userId) {
+        return logRepository.findByUserId(userId).stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
-    public List<LogEntity> getLogsByUserId(Long userId) {
-        return logRepository.findAll().stream()
-                .filter(log -> log.getUserId().equals(userId))
-                .toList(); // 사용자 ID로 필터링
+    private LogDto convertToDto(LogEntity log) {
+        return new LogDto(
+                log.getLogId(),
+                log.getUserId(),
+                log.getInputText(),
+                log.getOpenaiResponse(),
+                log.getProcessedResult(),
+                log.getCreatedAt()
+        );
     }
 }

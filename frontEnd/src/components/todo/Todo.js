@@ -3,7 +3,7 @@ import { FaEdit } from 'react-icons/fa'; // 수정 아이콘 추가
 import styles from './Todo.module.css';
 import AddModal from '../add/AddModal';
 import TodoEditModal from '../edit/TodoEditModal'; // 수정 모달 추가
-import axios from "axios";
+import api from '../../api/client';
 
 function Todo() {
     const [todos, setTodos] = useState([]);
@@ -16,16 +16,8 @@ function Todo() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const categoryResponse = await fetch("http://localhost:8085/api/categories/all", {
-                    method: "GET",
-                    credentials: "include",
-                });
-
-                if (!categoryResponse.ok) {
-                    throw new Error('Failed to fetch categories');
-                }
-
-                const categories = await categoryResponse.json();
+                const categoryResponse = await api.get("/api/categories/all");
+                const categories = categoryResponse.data;
                 const formattedCategories = categories.map((category) => ({
                     id: category.categoryId,
                     name: category.categoryName,
@@ -33,16 +25,8 @@ function Todo() {
                 }));
                 setLabelOptions(formattedCategories);
 
-                const tasksResponse = await fetch("http://localhost:8085/api/task/find", {
-                    method: "GET",
-                    credentials: "include",
-                });
-
-                if (!tasksResponse.ok) {
-                    throw new Error('Failed to fetch tasks');
-                }
-
-                const tasks = await tasksResponse.json();
+                const tasksResponse = await api.get("/api/task/find");
+                const tasks = tasksResponse.data;
                 const formattedTasks = tasks.map((task) => {
                     const category = formattedCategories.find((category) => category.id === task.categoryId);
                     return {
@@ -95,9 +79,7 @@ function Todo() {
 
         try {
             // 서버로 상태 업데이트 요청
-            const response = await axios.put("/api/task/updateStatus", updateData, {
-                headers: { "Content-Type": "application/json" },
-            });
+            const response = await api.put("/api/task/updateStatus", updateData);
 
             console.log("Task status updated successfully:", response.data);
         } catch (error) {

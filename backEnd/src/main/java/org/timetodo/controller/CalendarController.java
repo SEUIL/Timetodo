@@ -1,19 +1,16 @@
 package org.timetodo.controller;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.timetodo.auth.CurrentUserService;
 import org.timetodo.dto.CalendarDTO;
 import org.timetodo.dto.CalendarRequestDto;
-import org.timetodo.entity.CalendarEntity;
 import org.timetodo.service.CalendarService;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 //@RestController // 이 클래스는 REST API 요청을 처리하는 컨트롤러임을 나타냅니다.
@@ -24,123 +21,58 @@ import java.util.List;
 public class CalendarController {
 
     private final CalendarService calendarService; // CalendarService를 주입받아 사용합니다.
-    //private final JwtService jwtService;
+    private final CurrentUserService currentUserService;
 
     // 새로운 일정을 추가하는 엔드포인트
     @PostMapping("/add")
     public ResponseEntity<?> addCalendar(
             @RequestBody CalendarRequestDto calendarRequestDto,
             HttpServletRequest request) {
-        Long userId = null;
-
-        try {
-            // 쿠키에서 userId 가져오기
-            Cookie[] cookies = request.getCookies();
-            if (cookies == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("쿠키가 존재하지 않습니다.");
-            }
-
-            // userId 쿠키 검색
-            Cookie userCookie = Arrays.stream(cookies)
-                    .filter(cookie -> cookie.getName().equals("userId"))
-                    .findAny()
-                    .orElse(null);
-
-            if (userCookie == null || userCookie.getValue() == null || userCookie.getValue().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("userId 쿠키가 없거나 비어 있습니다.");
-            }
-
-            // userId 파싱
-            try {
-                userId = Long.valueOf(userCookie.getValue());
-            } catch (NumberFormatException e) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("userId 쿠키 값이 올바르지 않습니다.");
-            }
-
-            log.info("세션에서 가져온 UserId : {}", userId);
-        } catch (Exception e) {
-            log.error("쿠키 처리 중 오류 발생", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("쿠키 처리 중 오류가 발생했습니다.");
-        }
-
-        try {
-            // Calendar 생성
-            calendarRequestDto.setUserId(userId);
-            Long categoryId = calendarRequestDto.getCategoryId(); //카테고리 아이디 설정
-            CalendarDTO calendar = calendarService.addCalendar(calendarRequestDto, userId, categoryId);
-
-            log.info("생성된 Calendar: {}", calendar);
-
-            // 성공적으로 생성된 CalendarDTO를 반환
-            return ResponseEntity.ok(calendar);
-        } catch (Exception e) {
-            log.error("캘린더 생성 중 오류 발생", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("캘린더 생성 중 오류가 발생했습니다.");
-        }
+        Long userId = currentUserService.requireCurrentUserId(request);
+        Long categoryId = calendarRequestDto.getCategoryId();
+        CalendarDTO calendar = calendarService.addCalendar(calendarRequestDto, userId, categoryId);
+        log.info("생성된 Calendar: {}", calendar);
+        return ResponseEntity.ok(calendar);
     }
 
 
     // 로그인한 유저의 일정을 전체 조회하는 엔드포인트
     @GetMapping("/find")
     public List<CalendarDTO> getUserCalendars(HttpServletRequest request) {
-        try {
-            Cookie[] cookies = request.getCookies();
-            if (cookies == null) {
-                throw new IllegalStateException("쿠키가 존재하지 않습니다.");
-            }
-
-            Cookie userCookie = Arrays.stream(cookies)
-                    .filter(cookie -> cookie.getName().equals("userId"))
-                    .findAny()
-                    .orElse(null);
-
-            if (userCookie == null || userCookie.getValue() == null || userCookie.getValue().isEmpty()) {
-                throw new IllegalStateException("userId 쿠키가 없거나 비어 있습니다.");
-            }
-
-            Long userId = Long.parseLong(userCookie.getValue());
-            log.info("캘린더 조회 성공, UserId from cookie: {}", userId);
-
-            return calendarService.getCalendarsByUserId(userId);
-        } catch (Exception e) {
-            log.error("Error in getUserCalendars:", e);
-            throw new RuntimeException("캘린더 조회 중 오류가 발생했습니다.");
-        }
+        Long userId = currentUserService.requireCurrentUserId(request);
+        return calendarService.getCalendarsByUserId(userId);
     }
 
 
     // 특정 일정을 업데이트하는 엔드포인트
     @PutMapping("/update")
-    public ResponseEntity<CalendarEntity> updateCalendar(
+    public ResponseEntity<CalendarDTO> updateCalendar(
             @RequestBody CalendarRequestDto calendarRequestDto,
-            @RequestParam Long categoryId) {
-        // 경로 변수로 전달된 id에 해당하는 일정을 찾아,
-        // 사용자가 보낸 데이터로 업데이트하고 그 결과를 반환합니다.
-        CalendarEntity updatedCalendar = calendarService.updateCalendar(calendarRequestDto, categoryId);
+            @RequestParam Long categoryId,
+            HttpServletRequest request) {
+        Long userId = currentUserService.requireCurrentUserId(request);
+        CalendarDTO updatedCalendar = calendarService.updateCalendar(calendarRequestDto, categoryId, userId);
         return ResponseEntity.ok(updatedCalendar); // 성공 시 업데이트된 일정을 반환
     }
 
     // 특정 일정을 삭제하는 엔드포인트
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteCalendar(@RequestBody Long id) {
-        // 경로 변수로 전달된 id에 해당하는 일정을 삭제합니다.
-        calendarService.deleteCalendar(id);
+    public ResponseEntity<Void> deleteCalendar(@RequestBody Long id, HttpServletRequest request) {
+        Long userId = currentUserService.requireCurrentUserId(request);
+        calendarService.deleteCalendar(id, userId);
         return ResponseEntity.noContent().build(); // 성공 시 응답 본문 없이 204 상태코드 반환
     }
 
     // 일정 검색 엔드포인트
     @GetMapping("/search")
-    public ResponseEntity<List<CalendarEntity>> searchEvents(
+    public ResponseEntity<List<CalendarDTO>> searchEvents(
             @RequestBody String title,
             @RequestBody String description,
             @RequestBody Long categoryId,
-            @RequestBody @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime) {
-        List<CalendarEntity> events = calendarService.searchEvents(title, description, categoryId, startTime);
+            @RequestBody @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            HttpServletRequest request) {
+        Long userId = currentUserService.requireCurrentUserId(request);
+        List<CalendarDTO> events = calendarService.searchEvents(title, description, categoryId, startTime, userId);
         return ResponseEntity.ok(events);
     }
 

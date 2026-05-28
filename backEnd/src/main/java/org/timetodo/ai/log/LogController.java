@@ -1,13 +1,13 @@
 package org.timetodo.ai.log;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.timetodo.entity.LogEntity;
+import org.timetodo.auth.CurrentUserService;
+import org.timetodo.dto.LogDto;
 
 import java.util.List;
 
@@ -16,16 +16,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LogController {
 
-    @Autowired
     private final LogService logService;
+    private final CurrentUserService currentUserService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<LogEntity>> getAllLogs() {
-        return ResponseEntity.ok(logService.getAllLogs());
+    public ResponseEntity<List<LogDto>> getAllLogs(HttpServletRequest request) {
+        Long userId = currentUserService.requireCurrentUserId(request);
+        return ResponseEntity.ok(logService.getLogsByUserId(userId));
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<LogEntity>> getLogsByUserId(@PathVariable Long userId) {
+    @GetMapping("/me")
+    public ResponseEntity<List<LogDto>> getLogsByCurrentUser(HttpServletRequest request) {
+        Long userId = currentUserService.requireCurrentUserId(request);
         return ResponseEntity.ok(logService.getLogsByUserId(userId));
     }
 }

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import axios from 'axios';
+import api from '../../api/client';
 import styles from './TTDStats.module.css';  // 스타일을 제대로 임포트
 
 // Chart.js 구성 요소 등록
@@ -14,13 +14,7 @@ function TTDStats() {
     useEffect(() => {
         const fetchTodoData = async () => {
             try {
-                const response = await axios.get("http://localhost:8085/api/task/find", {
-                    // API URL에 맞게 수정
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    withCredentials: true,
-                });
+                const response = await api.get("/api/task/find");
 
                 if (response.status === 200) {
                     // taskId, title, status만 추출

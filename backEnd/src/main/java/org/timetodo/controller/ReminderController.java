@@ -5,10 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-//import org.timetodo.JWT.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.timetodo.auth.CurrentUserService;
 import org.timetodo.dto.ReminderDto;
 import org.timetodo.dto.ReminderRequestDto;
-import org.timetodo.entity.ReminderEntity;
 import org.timetodo.service.ReminderService;
 
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.List;
 public class ReminderController {
 
     private final ReminderService reminderService;
-    //private final JwtService jwtService;
+    private final CurrentUserService currentUserService;
 
     /**
      * 알림 생성 또는 업데이트
@@ -29,7 +29,8 @@ public class ReminderController {
      */
     @PostMapping("/addTask")
     public ResponseEntity<ReminderDto> createTaskReminder(@RequestBody ReminderRequestDto reminderRequestDto,
-                                                          @RequestParam Long taskId) {
+                                                          @RequestParam Long taskId,
+                                                          HttpServletRequest request) {
         //프론트에서 taskId를 할당해줘야됌 (디코에 코드공유란에 올림) , 할일(taskId)을 선택해서 그 할일에 알림을 설정하는 로직
 
         //Long taskId = reminderRequestDto.getTaskId();
@@ -38,7 +39,8 @@ public class ReminderController {
 
         // Reminder 생성
         //reminderService.createTaskReminder(reminderRequestDto, taskId);
-        ReminderDto reminder = reminderService.createTaskReminder(reminderRequestDto, taskId);
+        Long userId = currentUserService.requireCurrentUserId(request);
+        ReminderDto reminder = reminderService.createTaskReminder(reminderRequestDto, taskId, userId);
 
         //return ResponseEntity.ok("Task Reminder created successfully");
         return ResponseEntity.status(HttpStatus.CREATED).body(reminder);
@@ -46,7 +48,8 @@ public class ReminderController {
 
     @PostMapping("/addCalendar")
     public ResponseEntity<ReminderDto> createCalendarReminder(@RequestBody ReminderRequestDto reminderRequestDto,
-                                                              @RequestParam Long calendarId) {
+                                                              @RequestParam Long calendarId,
+                                                              HttpServletRequest request) {
         //프론트에서 calendarId를 할당해줘야됌 (디코에 코드공유란에 올림)
 
         //Long calendarId = reminderRequestDto.getCalendarId();
@@ -55,7 +58,8 @@ public class ReminderController {
 
         // Reminder 생성
         //reminderService.createCalendarReminder(reminderRequestDto, calendarId);
-        ReminderDto reminder = reminderService.createCalendarReminder(reminderRequestDto, calendarId);
+        Long userId = currentUserService.requireCurrentUserId(request);
+        ReminderDto reminder = reminderService.createCalendarReminder(reminderRequestDto, calendarId, userId);
 
         //return ResponseEntity.ok("Calendar Reminder created successfully");
         return ResponseEntity.status(HttpStatus.CREATED).body(reminder);
@@ -67,15 +71,19 @@ public class ReminderController {
      * @return 알림 목록
      */
     @GetMapping("/findTask")
-    public List<ReminderEntity> getTaskReminders(@RequestBody ReminderRequestDto reminderRequestDto) {
+    public List<ReminderDto> getTaskReminders(@RequestBody ReminderRequestDto reminderRequestDto,
+                                              HttpServletRequest request) {
         Long taskId = reminderRequestDto.getTaskId();
-        return reminderService.getReminderByTaskId(taskId);
+        Long userId = currentUserService.requireCurrentUserId(request);
+        return reminderService.getReminderByTaskId(taskId, userId);
     }
 
     @GetMapping("/findCalendar")
-    public List<ReminderEntity> getCalendarsReminders(@RequestBody ReminderRequestDto reminderRequestDto) {
+    public List<ReminderDto> getCalendarsReminders(@RequestBody ReminderRequestDto reminderRequestDto,
+                                                   HttpServletRequest request) {
         Long calendarId = reminderRequestDto.getCalendarId();
-        return reminderService.getReminderByCalendarId(calendarId);
+        Long userId = currentUserService.requireCurrentUserId(request);
+        return reminderService.getReminderByCalendarId(calendarId, userId);
     }
 
     /**
@@ -84,8 +92,9 @@ public class ReminderController {
      * @return 성공 응답
      */
     @DeleteMapping("/{reminderId}")
-    public ResponseEntity<String> deleteReminder(@PathVariable Long reminderId) {
-        reminderService.deleteReminder(reminderId);
+    public ResponseEntity<String> deleteReminder(@PathVariable Long reminderId, HttpServletRequest request) {
+        Long userId = currentUserService.requireCurrentUserId(request);
+        reminderService.deleteReminder(reminderId, userId);
         return ResponseEntity.ok("알림 삭제 성공");
     }
 

@@ -8,6 +8,7 @@ import CalendarEditModal from "../edit/CalendarEditModal";
 import DetailModal from './DetailModal';
 import Modal from 'react-modal';
 import styles from './Calendar.module.css';
+import api from '../../api/client';
 
 Modal.setAppElement('#root');
 
@@ -25,16 +26,8 @@ function Calendar() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const categoryResponse = await fetch("http://localhost:8085/api/categories/all", {
-                    method: "GET",
-                    credentials: "include",
-                });
-
-                if (!categoryResponse.ok) {
-                    throw new Error('Failed to fetch categories');
-                }
-
-                const categories = await categoryResponse.json();
+                const categoryResponse = await api.get("/api/categories/all");
+                const categories = categoryResponse.data;
                 const formattedCategories = categories.map((category) => ({
                     id: category.categoryId,
                     name: category.categoryName,
@@ -42,16 +35,8 @@ function Calendar() {
                 }));
                 setLabelOptions(formattedCategories);
 
-                const eventsResponse = await fetch("http://localhost:8085/api/calendar/find", {
-                    method: "GET",
-                    credentials: "include",
-                });
-
-                if (!eventsResponse.ok) {
-                    throw new Error('Failed to fetch events');
-                }
-
-                const eventData = await eventsResponse.json();
+                const eventsResponse = await api.get("/api/calendar/find");
+                const eventData = eventsResponse.data;
                 const fullCalendarEvents = eventData.map((event) => {
                     const categoryColor = formattedCategories.find((label) => label.id === event.categoryId)?.color || '#808080';
                     return {
