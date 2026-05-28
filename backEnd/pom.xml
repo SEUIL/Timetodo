@@ -34,6 +34,16 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
+        <!-- Database migration -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
+
         <!-- MySQL JDBC Driver -->
         <dependency>
             <groupId>mysql</groupId>
@@ -65,7 +75,13 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Password hashing without enabling the full Spring Security filter chain yet -->
+        <!-- Spring Security session/authentication support -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- Password hashing -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>

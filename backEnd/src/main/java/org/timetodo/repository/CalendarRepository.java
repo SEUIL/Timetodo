@@ -16,9 +16,9 @@ public interface CalendarRepository extends JpaRepository<CalendarEntity, Long> 
 
 
     // 제목, 설명, 카테고리 ID, 날짜로 일정 검색
-    List<CalendarEntity> findByTitleContainingAndDescriptionContainingAndCategoryIdAndStartTime(
-            String title, String description, CategoryEntity categoryId, LocalDateTime startTime
+    List<CalendarEntity> findByTitleContainingAndDescriptionContainingAndCategoryAndStartTime(
+            String title, String description, CategoryEntity category, LocalDateTime startTime
     );
 
-    List<CalendarEntity> findByUserId(UserEntity user);
+    List<CalendarEntity> findByUser(UserEntity user);
 }

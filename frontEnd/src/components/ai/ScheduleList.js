@@ -6,7 +6,7 @@ function ScheduleList() {
 
     useEffect(() => {
         const fetchSchedules = async () => {
-            const response = await api.get("/api/calendar/find"); // 백엔드 API 호출
+            const response = await api.get("/api/calendars"); // 백엔드 API 호출
             setSchedules(response.data); // 일정 리스트를 상태에 저장
         };
         fetchSchedules();

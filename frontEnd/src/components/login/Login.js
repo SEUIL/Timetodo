@@ -10,7 +10,6 @@ import api from '../../api/client';
 function Login({ onLoginSuccess }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState(null); // 에러 메시지 상태 추가
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -30,8 +29,7 @@ function Login({ onLoginSuccess }) {
                 alert('로그인이 성공적으로 이루어졌습니다');
             }
         } catch (error) {
-            // 로그인 실패 시 에러 메시지 설정
-            setError("로그인 정보가 올바르지 않습니다.");
+            alert("로그인 정보가 올바르지 않습니다.");
         }
     };
 

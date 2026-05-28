@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaHome, FaCalendarAlt, FaClipboardList, FaChartBar, FaBell, FaChevronDown, FaPlus} from 'react-icons/fa';
+import { FaHome, FaCalendarAlt, FaClipboardList, FaChartBar, FaChevronDown, FaPlus} from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie'; // 쿠키 관리 라이브러리
 

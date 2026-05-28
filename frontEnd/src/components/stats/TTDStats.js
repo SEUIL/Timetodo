@@ -14,7 +14,7 @@ function TTDStats() {
     useEffect(() => {
         const fetchTodoData = async () => {
             try {
-                const response = await api.get("/api/task/find");
+                const response = await api.get("/api/tasks");
 
                 if (response.status === 200) {
                     // taskId, title, status만 추출

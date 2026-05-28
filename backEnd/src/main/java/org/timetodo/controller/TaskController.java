@@ -16,14 +16,14 @@ import java.util.List;
 @Slf4j
 @RestController // HTML 템플릿을 렌더링
 @RequiredArgsConstructor // final 필드로 선언된 의존성(서비스)을 자동으로 주입하는 생성자를 생성해줍니다.
-@RequestMapping("/api/task") // 이 컨트롤러의 모든 엔드포인트는 "/task" 경로로 시작됩니다.
+@RequestMapping("/api/tasks")
 public class TaskController {
 
     private final TaskService taskService; // TaskService를 주입받아 사용합니다.
     private final CurrentUserService currentUserService;
 
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<?> addTask(
             @RequestBody TaskRequestDto taskRequestDto,
             HttpServletRequest request) {
@@ -36,7 +36,7 @@ public class TaskController {
 
 
     // 특정 user 의 모든 할 일을 조회하는 엔드포인트
-    @GetMapping("/find")
+    @GetMapping
     public List<TaskDto> getUserTasks(HttpServletRequest request) {
         Long userId = currentUserService.requireCurrentUserId(request);
         return taskService.getTasksByUserId(userId);
@@ -44,28 +44,31 @@ public class TaskController {
 
 
     // 특정 할 일을 업데이트하는 엔드포인트
-    @PutMapping("/update")
+    @PutMapping("/{taskId}")
     public ResponseEntity<TaskDto> updateTask(
+            @PathVariable Long taskId,
             @RequestBody TaskRequestDto taskRequestDto,
-            @RequestParam Long categoryId,
             HttpServletRequest request) {
         Long userId = currentUserService.requireCurrentUserId(request);
+        taskRequestDto.setTaskId(taskId);
+        Long categoryId = taskRequestDto.getCategoryId();
         TaskDto updatedTask = taskService.updateTask(taskRequestDto, categoryId, userId);
         return ResponseEntity.ok(updatedTask); // 성공 시 업데이트된 할 일을 반환
     }
 
 
-    @PutMapping("/updateStatus")
-    public ResponseEntity<Void> updateTaskStatus(@RequestBody TaskStatusUpdateDto taskStatusUpdateDto,
+    @PatchMapping("/{taskId}/status")
+    public ResponseEntity<Void> updateTaskStatus(@PathVariable Long taskId,
+                                                 @RequestBody TaskStatusUpdateDto taskStatusUpdateDto,
                                                  HttpServletRequest request) {
         Long userId = currentUserService.requireCurrentUserId(request);
-        taskService.updateTaskStatus(taskStatusUpdateDto.getTaskId(), taskStatusUpdateDto.getStatus(), userId);
+        taskService.updateTaskStatus(taskId, taskStatusUpdateDto.getStatus(), userId);
         return ResponseEntity.ok().build(); // 상태 업데이트 완료 후 OK 응답
     }
 
     // 특정 할 일을 삭제하는 엔드포인트
-    @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteTask(@RequestBody Long taskId, HttpServletRequest request) {
+    @DeleteMapping("/{taskId}")
+    public ResponseEntity<Void> deleteTask(@PathVariable Long taskId, HttpServletRequest request) {
         Long userId = currentUserService.requireCurrentUserId(request);
         taskService.deleteTask(taskId, userId);
         return ResponseEntity.noContent().build(); // 성공 시 응답 본문 없이 204 상태코드 반환

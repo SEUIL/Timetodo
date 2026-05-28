@@ -68,9 +68,9 @@ public class CalendarService {
                 throw new IllegalArgumentException("Invalid repeat type: " + calendarRequestDto.getRepeatType());
         }
 
-        // 2. userId를 사용하여 UserEntity 조회 후 설정 , categoryId를 사용하여 CategoryId 조회 후 설정
-        calendar.setUserId(user);
-        calendar.setCategoryId(category);
+        // 2. 현재 사용자와 카테고리 관계 설정
+        calendar.setUser(user);
+        calendar.setCategory(category);
 
         // 3. CalendarEntity 저장
         CalendarEntity savedCalendar = calendarRepository.save(calendar);
@@ -91,18 +91,18 @@ public class CalendarService {
         dto.setRepeatType(calendar.getRepeatType());
 
         // UserEntity의 ID를 설정
-        if (calendar.getUserId() != null) {
-            dto.setUserId(calendar.getUserId().getUserId());
+        if (calendar.getUser() != null) {
+            dto.setUserId(calendar.getUser().getUserId());
         }
 
         // CategoryEntity의 ID를 설정
-        if (calendar.getCategoryId() != null) {
-            dto.setCategoryId(calendar.getCategoryId().getCategoryId());
+        if (calendar.getCategory() != null) {
+            dto.setCategoryId(calendar.getCategory().getCategoryId());
         }
 
         // ReminderEntity 리스트의 ID들을 설정
-        if (calendar.getReminderId() != null) {
-            List<Long> reminderIds = calendar.getReminderId().stream()
+        if (calendar.getReminders() != null) {
+            List<Long> reminderIds = calendar.getReminders().stream()
                     .map(ReminderEntity::getReminderId)
                     .collect(Collectors.toList());
             dto.setReminderIds(reminderIds);
@@ -118,7 +118,7 @@ public class CalendarService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
 
         // 사용자와 연관된 캘린더 엔티티 조회
-        List<CalendarEntity> calendars = calendarRepository.findByUserId(user);
+        List<CalendarEntity> calendars = calendarRepository.findByUser(user);
 
         // 캘린더 엔티티를 DTO로 변환
         return calendars.stream().map(this::convertToDto).collect(Collectors.toList());
@@ -142,7 +142,7 @@ public class CalendarService {
         existingCalendar.setEndTime(calendarRequestDto.getEndTime());
         existingCalendar.setLocation(calendarRequestDto.getLocation());
         existingCalendar.setRepeatType(calendarRequestDto.getRepeatType());
-        existingCalendar.setCategoryId(category);
+        existingCalendar.setCategory(category);
 
         return convertToDto(calendarRepository.save(existingCalendar)); // 업데이트 후 저장
     }
@@ -162,22 +162,22 @@ public class CalendarService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid category ID"));
         validateCategoryOwner(category, userId);
 
-        return calendarRepository.findByTitleContainingAndDescriptionContainingAndCategoryIdAndStartTime(
+        return calendarRepository.findByTitleContainingAndDescriptionContainingAndCategoryAndStartTime(
                 title, description, category, startTime
         ).stream()
-                .filter(calendar -> calendar.getUserId() != null && userId.equals(calendar.getUserId().getUserId()))
+                .filter(calendar -> calendar.getUser() != null && userId.equals(calendar.getUser().getUserId()))
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     private void validateCalendarOwner(CalendarEntity calendar, Long userId) {
-        if (calendar.getUserId() == null || !userId.equals(calendar.getUserId().getUserId())) {
+        if (calendar.getUser() == null || !userId.equals(calendar.getUser().getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 일정에 접근할 수 없습니다.");
         }
     }
 
     private void validateCategoryOwner(CategoryEntity category, Long userId) {
-        if (category.getUserId() == null || !userId.equals(category.getUserId().getUserId())) {
+        if (category.getUser() == null || !userId.equals(category.getUser().getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 카테고리에 접근할 수 없습니다.");
         }
     }

@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.timetodo.auth.CurrentUserService;
 import org.timetodo.dto.UserDTO;
@@ -89,6 +90,7 @@ public class UserController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpSession session) {
         session.invalidate(); // 세션 무효화하여 모든 사용자 정보 삭제
+        SecurityContextHolder.clearContext();
         return ResponseEntity.ok("Logout successful");
     }
 

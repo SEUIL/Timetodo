@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import AddModal from '../add/AddModal';
@@ -14,11 +13,9 @@ Modal.setAppElement('#root');
 function TodayCalendar() {
     const [isAddModalOpen, setAddModalOpen] = useState(false);
     const [isEditModalOpen, setEditModalOpen] = useState(false);
-    const [isDetailModalOpen, setDetailModalOpen] = useState(false); // 세부 정보 모달 상태
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedEvent, setSelectedEvent] = useState(null);
     const calendarRef = useRef(null);
-    const [labelOptions, setLabelOptions] = useState([]);
     const [events, setEvents] = useState([]);
 
     // 데이터 로드
@@ -32,9 +29,8 @@ function TodayCalendar() {
                     name: category.categoryName,
                     color: category.color || '#808080',
                 }));
-                setLabelOptions(formattedCategories);
 
-                const eventsResponse = await api.get("/api/calendar/find");
+                const eventsResponse = await api.get("/api/calendars");
                 const eventData = eventsResponse.data;
                 const fullCalendarEvents = eventData.map((event) => {
                     const categoryColor = formattedCategories.find((label) => label.id === event.categoryId)?.color || '#808080';
@@ -47,6 +43,7 @@ function TodayCalendar() {
                         location: event.location,
                         color: categoryColor,
                         repeatType: event.repeatType,
+                        categoryId: event.categoryId,
                     };
                 });
 
@@ -78,6 +75,7 @@ function TodayCalendar() {
                 end: null,
                 description: clickedEvent.description,
                 repeatType: clickedEvent.repeatType, // 반복 설정 전달
+                categoryId: clickedEvent.categoryId,
             };
 
             // 상태 업데이트
@@ -87,12 +85,6 @@ function TodayCalendar() {
             console.error("Event not found in the events array");
             alert("해당 이벤트를 찾을 수 없습니다."); // 사용자 알림 추가
         }
-    };
-
-    // 세부 정보 모달 닫기
-    const closeDetailModal = () => {
-        setDetailModalOpen(false);
-        setSelectedEvent(null);
     };
 
     // AddModal 닫기

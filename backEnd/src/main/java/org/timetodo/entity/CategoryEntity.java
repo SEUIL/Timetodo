@@ -6,9 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import org.timetodo.entity.UserEntity;
-
-
 import java.util.List;
 
 @Entity(name = "category_entity")
@@ -33,12 +30,12 @@ public class CategoryEntity {
     // N:1 관계 설정 및 외래 키 명시
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity userId;
+    private UserEntity user;
 
-    @OneToMany(mappedBy = "categoryId", cascade = CascadeType.PERSIST, orphanRemoval = false)
-    private List<CalendarEntity> calendar;
+    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST, orphanRemoval = false)
+    private List<CalendarEntity> calendars;
 
-    @OneToMany(mappedBy = "categoryId", cascade = CascadeType.PERSIST, orphanRemoval = false)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST, orphanRemoval = false)
     private List<TaskEntity> tasks;
 
 }

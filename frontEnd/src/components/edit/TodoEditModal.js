@@ -47,12 +47,12 @@ function TodoEditModal({ isOpen, onRequestClose, onSave, onDelete, task, labelOp
 
         // 요청 데이터 구성
         const taskData = {
-            taskId: task.taskId, // taskId를 추가하여 백엔드로 전달
             title: title.trim(),
             priority,
             dueDate: formatDateTime(deadline),
             repeatType: repeat === '반복 없음' ? '' : repeat, // 반복 설정 저장
             status: task.status|| '보류 중',
+            categoryId: selectedCategoryId,
         };
 
         console.log("Sending taskData to update:", taskData);
@@ -60,7 +60,7 @@ function TodoEditModal({ isOpen, onRequestClose, onSave, onDelete, task, labelOp
         try {
             // 서버로 업데이트 요청
             const response = await api.put(
-                `/api/task/update?categoryId=${encodeURIComponent(selectedCategoryId)}`, // 경로 변수 및 쿼리 파라미터 포함
+                `/api/tasks/${task.taskId}`,
                 taskData // 요청 본문
             );
 
@@ -93,9 +93,7 @@ function TodoEditModal({ isOpen, onRequestClose, onSave, onDelete, task, labelOp
         }
         if (window.confirm('정말로 이 할 일을 삭제하시겠습니까?')) {
             try {
-                await api.delete("/api/task/delete", {
-                    data: task.taskId,
-                });
+                await api.delete(`/api/tasks/${task.taskId}`);
                 onDelete(task.taskId);
                 onRequestClose();
             } catch (error){

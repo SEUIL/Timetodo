@@ -19,7 +19,6 @@ function Calendar() {
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedEvent, setSelectedEvent] = useState(null);
     const calendarRef = useRef(null);
-    const [labelOptions, setLabelOptions] = useState([]);
     const [events, setEvents] = useState([]);
 
     // 데이터 로드
@@ -33,9 +32,8 @@ function Calendar() {
                     name: category.categoryName,
                     color: category.color || '#808080',
                 }));
-                setLabelOptions(formattedCategories);
 
-                const eventsResponse = await api.get("/api/calendar/find");
+                const eventsResponse = await api.get("/api/calendars");
                 const eventData = eventsResponse.data;
                 const fullCalendarEvents = eventData.map((event) => {
                     const categoryColor = formattedCategories.find((label) => label.id === event.categoryId)?.color || '#808080';
@@ -48,6 +46,7 @@ function Calendar() {
                         location: event.location,
                         color: categoryColor,
                         repeatType: event.repeatType,
+                        categoryId: event.categoryId,
                     };
                 });
 
@@ -83,6 +82,7 @@ function Calendar() {
                 end: null,
                 description: clickedEvent.description,
                 repeatType: clickedEvent.repeatType, // 반복 설정 전달
+                categoryId: clickedEvent.categoryId,
             };
 
             // 상태 업데이트

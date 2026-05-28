@@ -14,7 +14,6 @@ function CalendarEditModal({ isOpen, onRequestClose, onSave, onDelete, selectedE
     // 상태 정의
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [selectedLabel, setSelectedLabel] = useState('라벨 없음');
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
     const [labelOptions, setLabelOptions] = useState([{ id: null, name: '라벨 없음', color: '#808080' }]);
     const [startDate, setStartDate] = useState(new Date());
@@ -57,7 +56,6 @@ function CalendarEditModal({ isOpen, onRequestClose, onSave, onDelete, selectedE
         if (selectedEvent) {
             setTitle(selectedEvent.title || '');
             setDescription(selectedEvent.description || '');
-            setSelectedLabel(selectedEvent.labelName || '라벨 없음');
             setSelectedCategoryId(selectedEvent.categoryId || null);
             setStartDate(new Date());
             setEndDate(new Date());
@@ -66,7 +64,6 @@ function CalendarEditModal({ isOpen, onRequestClose, onSave, onDelete, selectedE
             // 초기화
             setTitle('');
             setDescription('');
-            setSelectedLabel('라벨 없음');
             setSelectedCategoryId(null);
             setStartDate(new Date());
             setEndDate(new Date());
@@ -83,12 +80,12 @@ function CalendarEditModal({ isOpen, onRequestClose, onSave, onDelete, selectedE
 
         // 요청 데이터 구성
         const eventData = {
-            calendarId: selectedEvent.id, // 이벤트 ID
             title: title.trim(),
             startTime: formatDateTime(startDate), // ISO8601 형식
             end_time: formatDateTime(endDate), // ISO8601 형식
             description: description || null,
             repeatType: repeat === "반복 없음" ? null : repeat, // 반복 설정
+            categoryId: selectedCategoryId,
         };
 
         console.log("Sending eventData to update:", eventData);
@@ -96,7 +93,7 @@ function CalendarEditModal({ isOpen, onRequestClose, onSave, onDelete, selectedE
         try {
             // 서버로 업데이트 요청
             const response = await api.put(
-                `/api/calendar/update?categoryId=${encodeURIComponent(selectedCategoryId)}`, // 엔드포인트
+                `/api/calendars/${selectedEvent.id}`,
                 eventData // 요청 본문
             );
 
@@ -133,9 +130,7 @@ function CalendarEditModal({ isOpen, onRequestClose, onSave, onDelete, selectedE
         if (window.confirm("정말로 삭제하시겠습니까?")) {
             try {
                 // 서버로 삭제 요청
-                await api.delete("/api/calendar/delete", {
-                    data: selectedEvent.id, // 요청 본문으로 전달
-                });
+                await api.delete(`/api/calendars/${selectedEvent.id}`);
                 onDelete(selectedEvent.id);
 
                 onRequestClose();
@@ -192,7 +187,6 @@ function CalendarEditModal({ isOpen, onRequestClose, onSave, onDelete, selectedE
                     <CustomDropdown
                         options={labelOptions}
                         onLabelSelect={(label) => {
-                            setSelectedLabel(label.name);
                             setSelectedCategoryId(label.id);
                         }}
                         onAddLabel={() => setIsLabelModalOpen(true)}

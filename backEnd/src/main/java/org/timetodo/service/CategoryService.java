@@ -28,7 +28,7 @@ public class CategoryService {
         CategoryEntity category = new CategoryEntity();
         category.setCategoryName(categoryDto.getCategoryName());
         category.setColor(categoryDto.getColor());
-        category.setUserId(user);
+        category.setUser(user);
         CategoryEntity savedCategory = categoryRepository.save(category);
 
         return convertToResponseDto(savedCategory);
@@ -46,7 +46,7 @@ public class CategoryService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
 
-        List<CategoryEntity> categories = categoryRepository.findByUserId(user);
+        List<CategoryEntity> categories = categoryRepository.findByUser(user);
         return categories.stream()
                 .map(category -> new CategoryResponseDto(
                         category.getCategoryId(),
@@ -89,7 +89,7 @@ public class CategoryService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
 
         // 사용자와 카테고리 이름으로 카테고리 조회
-        CategoryEntity category = categoryRepository.findByUserIdAndCategoryName(user, categoryName);
+        CategoryEntity category = categoryRepository.findByUserAndCategoryName(user, categoryName);
         if (category == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 이름의 카테고리를 찾을 수 없습니다.");
         }
@@ -99,7 +99,7 @@ public class CategoryService {
     }
 
     private void validateCategoryOwner(CategoryEntity category, Long userId) {
-        if (category.getUserId() == null || !userId.equals(category.getUserId().getUserId())) {
+        if (category.getUser() == null || !userId.equals(category.getUser().getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 카테고리에 접근할 수 없습니다.");
         }
     }

@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface ReminderRepository extends JpaRepository<ReminderEntity,Long> {
-    List<ReminderEntity> findByTaskId(TaskEntity taskId);
+    List<ReminderEntity> findByTask(TaskEntity task);
 
-    List<ReminderEntity> findByCalendarId(CalendarEntity calendarId);
+    List<ReminderEntity> findByCalendar(CalendarEntity calendar);
 }

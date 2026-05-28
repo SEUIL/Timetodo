@@ -15,7 +15,6 @@ function AddModal({ isOpen, onRequestClose, onSave, defaultTab }) {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [priority, setPriority] = useState('우선순위 없음');
-    const [selectedLabel, setSelectedLabel] = useState('라벨 없음');
     const [selectedCategoryId, setSelectedCategoryId] = useState(null); // 선택한 카테고리 ID
     const [labelOptions, setLabelOptions] = useState([{ id: null, name: '라벨 없음', color: '#808080' }]);
     const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
@@ -133,7 +132,7 @@ function AddModal({ isOpen, onRequestClose, onSave, defaultTab }) {
         };
 
         try {
-            const response = await api.post('/api/task/add', newTask);
+            const response = await api.post('/api/tasks', newTask);
             const savedTask = response.data;
             if (!savedTask) {
                 throw new Error('응답 데이터가 없습니다.');
@@ -200,7 +199,7 @@ function AddModal({ isOpen, onRequestClose, onSave, defaultTab }) {
         };
 
         try {
-            const response = await api.post('/api/calendar/add', newEvent);
+            const response = await api.post('/api/calendars', newEvent);
             const savedEvent = response.data;
             if (!savedEvent) {
                 throw new Error('응답 데이터가 없습니다.');
@@ -230,7 +229,6 @@ function AddModal({ isOpen, onRequestClose, onSave, defaultTab }) {
         setTitle('');
         setDescription('');
         setPriority('우선순위 없음');
-        setSelectedLabel('라벨 없음');
         setSelectedCategoryId(null);
         setStartDate(new Date());
         setEndDate(new Date());
@@ -239,11 +237,6 @@ function AddModal({ isOpen, onRequestClose, onSave, defaultTab }) {
         setDeadline(new Date());
     };
 
-
-    const handleLabelSelect = (label) => {
-        setSelectedLabel(label.name);
-        setSelectedCategoryId(label.id); // 선택한 카테고리 ID 저장
-    };
 
     return (
         <Modal
@@ -340,7 +333,6 @@ function AddModal({ isOpen, onRequestClose, onSave, defaultTab }) {
                         options={labelOptions}
                         onLabelSelect={(label) => {
                             console.log("Selected Label Object:", label);
-                            setSelectedLabel(label.name);
                             setSelectedCategoryId(label.id);
                         }}
                         onAddLabel={() => setIsLabelModalOpen(true)}
@@ -351,8 +343,8 @@ function AddModal({ isOpen, onRequestClose, onSave, defaultTab }) {
                 <label className={styles.label}>
                     <FaSyncAlt className={styles.icon}/>
                     <select
-                        value={repeat}
-                        onChange={(e) => setRepeat(e.target.value)}
+                        value={reminder}
+                        onChange={(e) => setReminder(e.target.value)}
                         className={styles.select}
                     >
                         <option value="반복 없음">반복 없음</option>

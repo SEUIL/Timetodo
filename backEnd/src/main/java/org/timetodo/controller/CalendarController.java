@@ -17,14 +17,14 @@ import java.util.List;
 @Slf4j
 @RestController // HTML 템플릿을 렌더링
 @RequiredArgsConstructor // final 필드로 선언된 의존성(서비스)을 자동으로 주입하는 생성자를 생성해줍니다.
-@RequestMapping("/api/calendar") // 이 컨트롤러의 모든 엔드포인트는 "/calendar" 경로로 시작됩니다.
+@RequestMapping("/api/calendars")
 public class CalendarController {
 
     private final CalendarService calendarService; // CalendarService를 주입받아 사용합니다.
     private final CurrentUserService currentUserService;
 
     // 새로운 일정을 추가하는 엔드포인트
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<?> addCalendar(
             @RequestBody CalendarRequestDto calendarRequestDto,
             HttpServletRequest request) {
@@ -37,7 +37,7 @@ public class CalendarController {
 
 
     // 로그인한 유저의 일정을 전체 조회하는 엔드포인트
-    @GetMapping("/find")
+    @GetMapping
     public List<CalendarDTO> getUserCalendars(HttpServletRequest request) {
         Long userId = currentUserService.requireCurrentUserId(request);
         return calendarService.getCalendarsByUserId(userId);
@@ -45,21 +45,23 @@ public class CalendarController {
 
 
     // 특정 일정을 업데이트하는 엔드포인트
-    @PutMapping("/update")
+    @PutMapping("/{calendarId}")
     public ResponseEntity<CalendarDTO> updateCalendar(
+            @PathVariable Long calendarId,
             @RequestBody CalendarRequestDto calendarRequestDto,
-            @RequestParam Long categoryId,
             HttpServletRequest request) {
         Long userId = currentUserService.requireCurrentUserId(request);
+        calendarRequestDto.setCalendarId(calendarId);
+        Long categoryId = calendarRequestDto.getCategoryId();
         CalendarDTO updatedCalendar = calendarService.updateCalendar(calendarRequestDto, categoryId, userId);
         return ResponseEntity.ok(updatedCalendar); // 성공 시 업데이트된 일정을 반환
     }
 
     // 특정 일정을 삭제하는 엔드포인트
-    @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteCalendar(@RequestBody Long id, HttpServletRequest request) {
+    @DeleteMapping("/{calendarId}")
+    public ResponseEntity<Void> deleteCalendar(@PathVariable Long calendarId, HttpServletRequest request) {
         Long userId = currentUserService.requireCurrentUserId(request);
-        calendarService.deleteCalendar(id, userId);
+        calendarService.deleteCalendar(calendarId, userId);
         return ResponseEntity.noContent().build(); // 성공 시 응답 본문 없이 204 상태코드 반환
     }
 

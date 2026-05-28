@@ -85,7 +85,7 @@ class TaskServiceTest {
         category.setCategoryId(id);
         category.setCategoryName("category" + id);
         category.setColor("#808080");
-        category.setUserId(user);
+        category.setUser(user);
         return category;
     }
 
@@ -97,8 +97,8 @@ class TaskServiceTest {
         task.setPriority("일반");
         task.setStatus("보류 중");
         task.setRepeatType("반복 없음");
-        task.setUserId(user);
-        task.setCategoryId(category);
+        task.setUser(user);
+        task.setCategory(category);
         return task;
     }
 

@@ -34,15 +34,15 @@ public class UserEntity {
     @OneToOne // 1:1 관계, 연결된 엔티티도 같이 저장/삭제
     private PreferencesEntity preferences; // Foreign Key (외래 키)
 
-    @OneToMany(mappedBy = "userId")
+    @OneToMany(mappedBy = "user")
     @ToString.Exclude
     private List<TaskEntity> tasks;
 
-    @OneToMany(mappedBy = "userId")
+    @OneToMany(mappedBy = "user")
     @ToString.Exclude
     private List<CategoryEntity> categories;
 
-    @OneToMany(mappedBy = "userId")
+    @OneToMany(mappedBy = "user")
     @ToString.Exclude // Lombok 사용 시 순환 참조 방지
     private List<CalendarEntity> calendars;
 }

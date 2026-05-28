@@ -25,7 +25,7 @@ function Todo() {
                 }));
                 setLabelOptions(formattedCategories);
 
-                const tasksResponse = await api.get("/api/task/find");
+                const tasksResponse = await api.get("/api/tasks");
                 const tasks = tasksResponse.data;
                 const formattedTasks = tasks.map((task) => {
                     const category = formattedCategories.find((category) => category.id === task.categoryId);
@@ -88,7 +88,7 @@ function Todo() {
 
         try {
             // 서버로 상태 업데이트 요청
-            const response = await api.put("/api/task/updateStatus", updateData);
+            const response = await api.patch(`/api/tasks/${taskId}/status`, updateData);
 
             console.log("Task status updated successfully:", response.data);
         } catch (error) {

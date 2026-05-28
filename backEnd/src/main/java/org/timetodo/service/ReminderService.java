@@ -42,7 +42,7 @@ public class ReminderService {
 
         // 2. ReminderEntity 생성
         ReminderEntity reminder = new ReminderEntity();
-        reminder.setTaskId(task); // ManyToOne 관계로 설정된 Task를 연결
+        reminder.setTask(task); // ManyToOne 관계로 설정된 Task를 연결
         reminder.setNotificationsEnabled(reminderRequestDto.isNotificationsEnabled()); //알림 설정 여부 (True/False)
         reminder.setTimeBefore(reminderRequestDto.getTimeBefore()); // 알림 시작 시간 (분 단위)
         reminder.setRepeats(reminderRequestDto.isRepeats()); // 알림 반복 여부
@@ -68,7 +68,7 @@ public class ReminderService {
 
         // 2. ReminderEntity 생성
         ReminderEntity reminder = new ReminderEntity();
-        reminder.setCalendarId(calendar); // ManyToOne 관계로 설정된 Calendar를 연결
+        reminder.setCalendar(calendar); // ManyToOne 관계로 설정된 Calendar를 연결
         reminder.setNotificationsEnabled(reminderRequestDto.isNotificationsEnabled());
         reminder.setTimeBefore(reminderRequestDto.getTimeBefore());
         reminder.setRepeats(reminderRequestDto.isRepeats());
@@ -89,12 +89,12 @@ public class ReminderService {
         dto.setTimeBefore(reminder.getTimeBefore());
         dto.setRepeats(reminder.isRepeats());
 
-        if(reminder.getTaskId() != null) {
-            dto.setTaskId(reminder.getTaskId().getTaskId());
+        if(reminder.getTask() != null) {
+            dto.setTaskId(reminder.getTask().getTaskId());
         }
 
-        if(reminder.getCalendarId() != null) {
-            dto.setCalendarId(reminder.getCalendarId().getCalendarId());
+        if(reminder.getCalendar() != null) {
+            dto.setCalendarId(reminder.getCalendar().getCalendarId());
         }
 
         return dto;
@@ -110,7 +110,7 @@ public class ReminderService {
         TaskEntity task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found with ID: " + taskId));
         validateTaskOwner(task, userId);
-        return reminderRepository.findByTaskId(task).stream()
+        return reminderRepository.findByTask(task).stream()
                 .map(this::converToDto)
                 .collect(Collectors.toList());
     }
@@ -125,7 +125,7 @@ public class ReminderService {
         CalendarEntity calendar = calendarRepository.findById(calendarId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Calendar not found with Id: " + calendarId));
         validateCalendarOwner(calendar, userId);
-        return reminderRepository.findByCalendarId(calendar).stream()
+        return reminderRepository.findByCalendar(calendar).stream()
                 .map(this::converToDto)
                 .collect(Collectors.toList());
     }
@@ -138,10 +138,10 @@ public class ReminderService {
         ReminderEntity reminder = reminderRepository.findById(reminderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reminder not found with ID: " + reminderId));
 
-        if (reminder.getTaskId() != null) {
-            validateTaskOwner(reminder.getTaskId(), userId);
-        } else if (reminder.getCalendarId() != null) {
-            validateCalendarOwner(reminder.getCalendarId(), userId);
+        if (reminder.getTask() != null) {
+            validateTaskOwner(reminder.getTask(), userId);
+        } else if (reminder.getCalendar() != null) {
+            validateCalendarOwner(reminder.getCalendar(), userId);
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "알림 소유자를 확인할 수 없습니다.");
         }
@@ -150,13 +150,13 @@ public class ReminderService {
     }
 
     private void validateTaskOwner(TaskEntity task, Long userId) {
-        if (task.getUserId() == null || !userId.equals(task.getUserId().getUserId())) {
+        if (task.getUser() == null || !userId.equals(task.getUser().getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 할 일에 접근할 수 없습니다.");
         }
     }
 
     private void validateCalendarOwner(CalendarEntity calendar, Long userId) {
-        if (calendar.getUserId() == null || !userId.equals(calendar.getUserId().getUserId())) {
+        if (calendar.getUser() == null || !userId.equals(calendar.getUser().getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 일정에 접근할 수 없습니다.");
         }
     }

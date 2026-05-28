@@ -87,9 +87,9 @@ public class TaskService{
             default:
                 throw new IllegalArgumentException("Invalid repeat type: " + taskRequestDto.getRepeatType());
         }
-        // 2. userId를 사용하여 UserEntity 조회 후 설정, categoryId를 사용하여 CategoryId 조회 후 설정
-        task.setUserId(user);
-        task.setCategoryId(category);
+        // 2. 현재 사용자와 카테고리 관계 설정
+        task.setUser(user);
+        task.setCategory(category);
 
         // 3. CalendarEntity 저장
         TaskEntity saveTask = taskRepository.save(task);
@@ -108,18 +108,18 @@ public class TaskService{
         dto.setRepeatType(task.getRepeatType());
 
         // UserEntity의 ID를 설정
-        if (task.getUserId() != null) {
-            dto.setUserId(task.getUserId().getUserId());
+        if (task.getUser() != null) {
+            dto.setUserId(task.getUser().getUserId());
         }
 
         // CategoryEntity의 ID를 설정
-        if(task.getTaskId() != null) {
-            dto.setCategoryId(task.getCategoryId().getCategoryId());
+        if(task.getCategory() != null) {
+            dto.setCategoryId(task.getCategory().getCategoryId());
         }
 
         // ReminderEntity 리스트의 ID들을 설정
-        if(task.getReminderId() != null) {
-            List<Long> reminderIds = task.getReminderId().stream()
+        if(task.getReminders() != null) {
+            List<Long> reminderIds = task.getReminders().stream()
                     .map(ReminderEntity::getReminderId)
                     .collect(Collectors.toList());
             dto.setReminderIds(reminderIds);
@@ -135,7 +135,7 @@ public class TaskService{
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
 
         // 사용자와 연관된 할 일 엔티티 조회
-        List<TaskEntity> tasks = taskRepository.findAllByUserId(user);
+        List<TaskEntity> tasks = taskRepository.findAllByUser(user);
 
         // 할 일 엔티티를 DTO로 변환
         return tasks.stream().map(this::convertTask).collect(Collectors.toList());
@@ -158,7 +158,7 @@ public class TaskService{
         existingTask.setPriority(taskRequestDto.getPriority());
         existingTask.setStatus(taskRequestDto.getStatus());
         existingTask.setRepeatType(taskRequestDto.getRepeatType());
-        existingTask.setCategoryId(category);
+        existingTask.setCategory(category);
 
         return convertTask(taskRepository.save(existingTask)); // 업데이트 후 저장
     }
@@ -187,13 +187,13 @@ public class TaskService{
     }
 
     private void validateTaskOwner(TaskEntity task, Long userId) {
-        if (task.getUserId() == null || !userId.equals(task.getUserId().getUserId())) {
+        if (task.getUser() == null || !userId.equals(task.getUser().getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 할 일에 접근할 수 없습니다.");
         }
     }
 
     private void validateCategoryOwner(CategoryEntity category, Long userId) {
-        if (category.getUserId() == null || !userId.equals(category.getUserId().getUserId())) {
+        if (category.getUser() == null || !userId.equals(category.getUser().getUserId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 카테고리에 접근할 수 없습니다.");
         }
     }

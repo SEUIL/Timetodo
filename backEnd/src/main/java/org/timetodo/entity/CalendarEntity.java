@@ -1,7 +1,6 @@
 package org.timetodo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -42,21 +41,21 @@ public class CalendarEntity {
     @Column(nullable = true)
     private String repeatType; // 반복 일정 유형 (예: daily, weekly)
 
-    //@JoinColumn(name = "category_id" )
     @ManyToOne // 여러 Calendar가 하나의 Category와 연관 (N:1 관계)
+    @JoinColumn(name = "category_id_category_id")
     @JsonIgnore
     @ToString.Exclude // Lombok 사용 시 순환 참조 방지
-    private CategoryEntity categoryId; // Foreign Key (외래 키) - Category 클래스와 연관
+    private CategoryEntity category;
 
-    //@JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.EAGER) // 여러 Calendar가 하나의 User와 연관 (N:1 관계)
+    @JoinColumn(name = "user_id_user_id")
     @JsonIgnore
     @ToString.Exclude
-    private UserEntity userId;//userMTOcalendar; // 사용자 ID (Foreign Key)
+    private UserEntity user;
 
-    @OneToMany(mappedBy = "calendarId")
+    @OneToMany(mappedBy = "calendar")
     @JsonIgnore
     @ToString.Exclude
-    private List<ReminderEntity> reminderId;
+    private List<ReminderEntity> reminders;
 
 }
