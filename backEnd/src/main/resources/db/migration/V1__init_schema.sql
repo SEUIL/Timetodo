@@ -35,11 +35,11 @@ CREATE TABLE calendar_entity (
     end_time DATETIME(6) NULL,
     location VARCHAR(255) NULL,
     repeat_type VARCHAR(255) NULL,
-    category_id_category_id BIGINT NULL,
-    user_id_user_id BIGINT NULL,
+    category_id BIGINT NULL,
+    user_id BIGINT NULL,
     PRIMARY KEY (calendar_id),
-    KEY idx_calendar_entity_category_id (category_id_category_id),
-    KEY idx_calendar_entity_user_id (user_id_user_id)
+    KEY idx_calendar_entity_category_id (category_id),
+    KEY idx_calendar_entity_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE task_entity (
@@ -49,11 +49,11 @@ CREATE TABLE task_entity (
     priority VARCHAR(255) NOT NULL,
     status VARCHAR(255) NOT NULL,
     repeat_type VARCHAR(255) NULL,
-    category_id_category_id BIGINT NULL,
-    user_id_user_id BIGINT NULL,
+    category_id BIGINT NULL,
+    user_id BIGINT NULL,
     PRIMARY KEY (task_id),
-    KEY idx_task_entity_category_id (category_id_category_id),
-    KEY idx_task_entity_user_id (user_id_user_id)
+    KEY idx_task_entity_category_id (category_id),
+    KEY idx_task_entity_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE reminder_entity (
@@ -92,19 +92,19 @@ ALTER TABLE category_entity
 
 ALTER TABLE calendar_entity
     ADD CONSTRAINT fk_calendar_category
-    FOREIGN KEY (category_id_category_id) REFERENCES category_entity (category_id);
+    FOREIGN KEY (category_id) REFERENCES category_entity (category_id);
 
 ALTER TABLE calendar_entity
     ADD CONSTRAINT fk_calendar_user
-    FOREIGN KEY (user_id_user_id) REFERENCES user_entity (user_id);
+    FOREIGN KEY (user_id) REFERENCES user_entity (user_id);
 
 ALTER TABLE task_entity
     ADD CONSTRAINT fk_task_category
-    FOREIGN KEY (category_id_category_id) REFERENCES category_entity (category_id);
+    FOREIGN KEY (category_id) REFERENCES category_entity (category_id);
 
 ALTER TABLE task_entity
     ADD CONSTRAINT fk_task_user
-    FOREIGN KEY (user_id_user_id) REFERENCES user_entity (user_id);
+    FOREIGN KEY (user_id) REFERENCES user_entity (user_id);
 
 ALTER TABLE reminder_entity
     ADD CONSTRAINT fk_reminder_task

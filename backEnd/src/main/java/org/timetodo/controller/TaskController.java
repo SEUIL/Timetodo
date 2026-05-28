@@ -1,6 +1,7 @@
 package org.timetodo.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class TaskController {
 
     @PostMapping
     public ResponseEntity<?> addTask(
-            @RequestBody TaskRequestDto taskRequestDto,
+            @Valid @RequestBody TaskRequestDto taskRequestDto,
             HttpServletRequest request) {
         Long userId = currentUserService.requireCurrentUserId(request);
         Long categoryId = taskRequestDto.getCategoryId();
@@ -47,7 +48,7 @@ public class TaskController {
     @PutMapping("/{taskId}")
     public ResponseEntity<TaskDto> updateTask(
             @PathVariable Long taskId,
-            @RequestBody TaskRequestDto taskRequestDto,
+            @Valid @RequestBody TaskRequestDto taskRequestDto,
             HttpServletRequest request) {
         Long userId = currentUserService.requireCurrentUserId(request);
         taskRequestDto.setTaskId(taskId);
@@ -59,7 +60,7 @@ public class TaskController {
 
     @PatchMapping("/{taskId}/status")
     public ResponseEntity<Void> updateTaskStatus(@PathVariable Long taskId,
-                                                 @RequestBody TaskStatusUpdateDto taskStatusUpdateDto,
+                                                 @Valid @RequestBody TaskStatusUpdateDto taskStatusUpdateDto,
                                                  HttpServletRequest request) {
         Long userId = currentUserService.requireCurrentUserId(request);
         taskService.updateTaskStatus(taskId, taskStatusUpdateDto.getStatus(), userId);

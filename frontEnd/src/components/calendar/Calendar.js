@@ -25,7 +25,7 @@ function Calendar() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const categoryResponse = await api.get("/api/categories/all");
+                const categoryResponse = await api.get("/api/categories");
                 const categories = categoryResponse.data;
                 const formattedCategories = categories.map((category) => ({
                     id: category.categoryId,

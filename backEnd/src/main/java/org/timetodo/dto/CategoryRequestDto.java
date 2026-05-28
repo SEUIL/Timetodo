@@ -2,7 +2,7 @@ package org.timetodo.dto;
 
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 @Data
 public class CategoryRequestDto {
@@ -10,6 +10,7 @@ public class CategoryRequestDto {
     private String categoryName;
 
     @NotBlank(message = "카테고리 색상은 필수입니다.")
+    @Pattern(regexp = "^#[0-9a-fA-F]{6}$", message = "카테고리 색상은 #RRGGBB 형식이어야 합니다.")
     private String color;
 
     private Long categoryId; // 카테고리 ID (삭제 시 필요)

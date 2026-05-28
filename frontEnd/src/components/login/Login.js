@@ -10,10 +10,12 @@ import api from '../../api/client';
 function Login({ onLoginSuccess }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setErrorMessage('');
 
         try {
             // 백엔드로 로그인 요청 보내기
@@ -26,10 +28,9 @@ function Login({ onLoginSuccess }) {
                 // 로그인 성공
                 onLoginSuccess(); // 로그인 성공 콜백 호출
                 navigate('/home'); // 메인 페이지로 리다이렉트
-                alert('로그인이 성공적으로 이루어졌습니다');
             }
         } catch (error) {
-            alert("로그인 정보가 올바르지 않습니다.");
+            setErrorMessage("로그인 정보가 올바르지 않습니다.");
         }
     };
 
@@ -68,6 +69,10 @@ function Login({ onLoginSuccess }) {
                     <button type="submit" className={styles.loginButton}>
                         로그인
                     </button>
+
+                    {errorMessage && (
+                        <p className={styles.errorMessage}>{errorMessage}</p>
+                    )}
 
                     <p className={styles.signupLink}>
                         아직 계정이 없으신가요? <Link to="/signup">회원가입</Link>

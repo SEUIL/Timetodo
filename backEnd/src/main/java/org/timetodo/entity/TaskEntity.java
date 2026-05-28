@@ -37,11 +37,11 @@ public class TaskEntity {
     private String repeatType; // 반복 일정 여부
 
     @ManyToOne // 여러 Task가 하나의 Category와 연관 (N:1 관계)
-    @JoinColumn(name = "category_id_category_id")
+    @JoinColumn(name = "category_id")
     private CategoryEntity category;
 
     @ManyToOne //여러 Task가 하나의 User와 연관 (N:1 관계)
-    @JoinColumn(name = "user_id_user_id")
+    @JoinColumn(name = "user_id")
     @JsonIgnore
     private UserEntity user;
 
@@ -49,4 +49,3 @@ public class TaskEntity {
     @JsonIgnore
     private List<ReminderEntity> reminders;
 }
-

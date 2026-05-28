@@ -12,9 +12,14 @@ import org.timetodo.repository.CategoryRepository;
 import org.timetodo.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
+
+    private static final String AI_DEFAULT_CATEGORY_PREFIX = "AI 기본-";
+    private static final String AI_DEFAULT_CATEGORY_COLOR = "#808080";
 
     private final CategoryRepository categoryRepository;
 
@@ -96,6 +101,24 @@ public class CategoryService {
 
         // CategoryResponseDto로 변환하여 반환
         return convertToResponseDto(category);
+    }
+
+    public Long getOrCreateAiDefaultCategoryId(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
+
+        String categoryName = AI_DEFAULT_CATEGORY_PREFIX + userId;
+        CategoryEntity existingCategory = categoryRepository.findByUserAndCategoryName(user, categoryName);
+        if (existingCategory != null) {
+            return existingCategory.getCategoryId();
+        }
+
+        CategoryEntity category = new CategoryEntity();
+        category.setCategoryName(categoryName);
+        category.setColor(AI_DEFAULT_CATEGORY_COLOR);
+        category.setUser(user);
+
+        return categoryRepository.save(category).getCategoryId();
     }
 
     private void validateCategoryOwner(CategoryEntity category, Long userId) {

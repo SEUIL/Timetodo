@@ -1,6 +1,7 @@
 package org.timetodo.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,7 +41,7 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<String> registerUser(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<String> registerUser(@Valid @RequestBody UserDTO userDTO) {
 
         userService.registerUser(userDTO);// DTO를 서비스 계층에서 엔티티로 변환 및 저장
         return ResponseEntity.ok("UserEntity registered successfully");

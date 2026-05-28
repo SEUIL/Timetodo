@@ -35,7 +35,7 @@ function CalendarEditModal({ isOpen, onRequestClose, onSave, onDelete, selectedE
         if (isOpen) {
             const fetchLabels = async () => {
                 try {
-                    const response = await api.get("/api/categories/all");
+                    const response = await api.get("/api/categories");
                     const categories = response.data || [];
                     const formattedCategories = categories.map((category) => ({
                         id: category.categoryId,

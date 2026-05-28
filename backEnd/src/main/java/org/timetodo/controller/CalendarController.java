@@ -1,6 +1,7 @@
 package org.timetodo.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,7 +27,7 @@ public class CalendarController {
     // 새로운 일정을 추가하는 엔드포인트
     @PostMapping
     public ResponseEntity<?> addCalendar(
-            @RequestBody CalendarRequestDto calendarRequestDto,
+            @Valid @RequestBody CalendarRequestDto calendarRequestDto,
             HttpServletRequest request) {
         Long userId = currentUserService.requireCurrentUserId(request);
         Long categoryId = calendarRequestDto.getCategoryId();
@@ -48,7 +49,7 @@ public class CalendarController {
     @PutMapping("/{calendarId}")
     public ResponseEntity<CalendarDTO> updateCalendar(
             @PathVariable Long calendarId,
-            @RequestBody CalendarRequestDto calendarRequestDto,
+            @Valid @RequestBody CalendarRequestDto calendarRequestDto,
             HttpServletRequest request) {
         Long userId = currentUserService.requireCurrentUserId(request);
         calendarRequestDto.setCalendarId(calendarId);
@@ -68,10 +69,10 @@ public class CalendarController {
     // 일정 검색 엔드포인트
     @GetMapping("/search")
     public ResponseEntity<List<CalendarDTO>> searchEvents(
-            @RequestBody String title,
-            @RequestBody String description,
-            @RequestBody Long categoryId,
-            @RequestBody @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            @RequestParam String title,
+            @RequestParam String description,
+            @RequestParam Long categoryId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             HttpServletRequest request) {
         Long userId = currentUserService.requireCurrentUserId(request);
         List<CalendarDTO> events = calendarService.searchEvents(title, description, categoryId, startTime, userId);

@@ -92,7 +92,7 @@ Git에는 실제 `.env`를 올리지 않고, 필요한 키 목록만 `backEnd/.e
 
 - 기존 문제: 프론트/백엔드 폴더 혼재, 비밀값 노출 위험, 평문 비밀번호, 클라이언트 `userId` 신뢰, owner 검증 부족, Entity/API naming 혼란
 - 개선 접근: 실행 환경 복구 -> 보안 위험 제거 -> 인증/권한 경계 정리 -> API 계약 정리 -> 테스트와 문서화 보강
-- 결과: 로컬 실행 가능, DB/AI key 환경변수 분리, BCrypt 적용, Spring Security session 인증 적용, 주요 owner 검증, controller 인증, AI parsing 테스트 추가, Flyway migration 적용
+- 결과: 로컬 실행 가능, DB/AI key 환경변수 분리, BCrypt 적용, Spring Security session 인증 적용, 주요 owner 검증, controller 인증/validation 테스트 추가, AI parsing/command 테스트 추가, Flyway migration 적용
 
 포트폴리오에서는 “이런 문제가 있었습니다”에서 끝내기보다 “문제를 식별했고, 우선순위를 나눠 이렇게 개선했습니다” 흐름으로 설명한다.
 
@@ -133,13 +133,15 @@ cd frontEnd && npm run build
 | `docs/기록/1차_개선_기록.md` | 비밀번호, 로그인 실패, CORS 개선 기록 |
 | `docs/기록/2차_개선_기록.md` | 세션 인증, owner 검증, API client 개선 기록 |
 | `docs/기록/3차_개선_기록.md` | Entity/API/Spring Security/AI 1차 개선 기록 |
+| `docs/기록/4차_개선_기록.md` | 2차 API, validation, DB migration, UX 개선 기록 |
 | `docs/계약/API_계약.md` | 주요 API endpoint, request, response 계약 |
 | `docs/계획/남은_작업.md` | 다음 작업 백로그 |
 | `docs/계획/2차_개선_계획.md` | 2차 개선 백로그와 우선순위 |
 | `docs/계획/코드진단_및_OpenCode_인계_계획.md` | 대규모 리뷰 인계 계획 |
+| `docs/테스트/E2E_시나리오.md` | 수동/E2E 자동화 후보 시나리오 |
 
 ## 남은 주요 작업
 
-- AI 기본 category ID `1` 하드코딩 제거
-- Controller 통합 테스트 확대
-- 배포 또는 포트폴리오 README 시각 자료 보강
+- E2E 자동화 도입 여부 결정
+- 배포 환경 실제 검증
+- README 시각 자료 보강

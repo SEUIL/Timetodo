@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,6 +66,40 @@ class CategoryServiceTest {
 
         assertEquals(403, exception.getStatusCode().value());
         verify(categoryRepository, never()).delete(category);
+    }
+
+    @Test
+    void getOrCreateAiDefaultCategoryIdReturnsExistingCategory() {
+        UserEntity user = user(7L);
+        CategoryEntity category = category(30L, user);
+        category.setCategoryName("AI 기본-7");
+
+        when(userRepository.findById(7L)).thenReturn(Optional.of(user));
+        when(categoryRepository.findByUserAndCategoryName(user, "AI 기본-7")).thenReturn(category);
+
+        Long categoryId = categoryService.getOrCreateAiDefaultCategoryId(7L);
+
+        assertEquals(30L, categoryId);
+        verify(categoryRepository, never()).save(category);
+    }
+
+    @Test
+    void getOrCreateAiDefaultCategoryIdCreatesCategoryWhenMissing() {
+        UserEntity user = user(7L);
+        CategoryEntity savedCategory = category(31L, user);
+        savedCategory.setCategoryName("AI 기본-7");
+
+        when(userRepository.findById(7L)).thenReturn(Optional.of(user));
+        when(categoryRepository.findByUserAndCategoryName(user, "AI 기본-7")).thenReturn(null);
+        when(categoryRepository.save(argThat(category ->
+                "AI 기본-7".equals(category.getCategoryName())
+                        && "#808080".equals(category.getColor())
+                        && user.equals(category.getUser())
+        ))).thenReturn(savedCategory);
+
+        Long categoryId = categoryService.getOrCreateAiDefaultCategoryId(7L);
+
+        assertEquals(31L, categoryId);
     }
 
     private UserEntity user(Long id) {

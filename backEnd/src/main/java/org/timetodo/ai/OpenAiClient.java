@@ -1,8 +1,9 @@
 package org.timetodo.ai;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,12 +23,13 @@ public class OpenAiClient {
     private static final String MODEL = "gpt-3.5-turbo";
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${openai.api.key}")
     private String apiKey;
 
     public String classify(String userInput) {
-        JSONObject requestBody = baseRequest(List.of(
+        Map<String, Object> requestBody = baseRequest(List.of(
                 Map.of("role", "system", "content",
                         "너는 사용자의 입력을 다음 네 가지로 분류하는 시스템이야:\\n\\n" +
                                 "1. 새로운 일정(Calendar)을 추가하는 내용.\n" +
@@ -44,13 +46,16 @@ public class OpenAiClient {
         ));
 
         String responseBody = post(requestBody);
-        JSONObject responseJson = new JSONObject(responseBody);
-        JSONArray choices = responseJson.getJSONArray("choices");
-        return choices.getJSONObject(0).getJSONObject("message").getString("content").trim();
+        try {
+            JsonNode rootNode = objectMapper.readTree(responseBody);
+            return rootNode.path("choices").get(0).path("message").path("content").asText().trim();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("OpenAI 분류 응답 파싱 실패", e);
+        }
     }
 
     public String createScheduleJson(String input) {
-        JSONObject requestBody = baseRequest(List.of(
+        Map<String, Object> requestBody = baseRequest(List.of(
                 Map.of("role", "system", "content",
                         "사용자의 요청을 JSON으로 처리하세요. 마지막 항목 뒤에 쉼표를 포함하지 마세요. 아래와 같은 구조를 따르십시오:\n" +
 
@@ -108,22 +113,30 @@ public class OpenAiClient {
         return post(requestBody);
     }
 
-    private JSONObject baseRequest(List<Map<String, String>> messages) {
-        JSONObject requestBody = new JSONObject();
-        requestBody.put("model", MODEL);
-        requestBody.put("messages", messages);
-        requestBody.put("max_tokens", 150);
-        requestBody.put("temperature", 0.7);
-        return requestBody;
+    private Map<String, Object> baseRequest(List<Map<String, String>> messages) {
+        return Map.of(
+                "model", MODEL,
+                "messages", messages,
+                "max_tokens", 150,
+                "temperature", 0.7
+        );
     }
 
-    private String post(JSONObject requestBody) {
+    private String post(Map<String, Object> requestBody) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
 
-        HttpEntity<String> request = new HttpEntity<>(requestBody.toString(), headers);
+        HttpEntity<String> request = new HttpEntity<>(toJson(requestBody), headers);
         ResponseEntity<String> response = restTemplate.postForEntity(CHAT_COMPLETIONS_URL, request, String.class);
         return response.getBody();
+    }
+
+    private String toJson(Map<String, Object> requestBody) {
+        try {
+            return objectMapper.writeValueAsString(requestBody);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("OpenAI 요청 JSON 생성 실패", e);
+        }
     }
 }

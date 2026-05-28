@@ -39,7 +39,7 @@ function AddModal({ isOpen, onRequestClose, onSave, defaultTab }) {
         if (isOpen) {
             const fetchLabels = async () => {
                 try {
-                    const response = await api.get("/api/categories/all");
+                    const response = await api.get("/api/categories");
                     const categories = response.data || [];
                     const formattedCategories = categories.map((category) => ({
                         id: category.categoryId, // 카테고리 ID
@@ -73,7 +73,7 @@ function AddModal({ isOpen, onRequestClose, onSave, defaultTab }) {
                 return;
             }
 
-            const response = await api.post("/api/categories/add", {
+            const response = await api.post("/api/categories", {
                 categoryName: newLabel.name.trim(),
                 color: newLabel.color,
             });
@@ -167,6 +167,12 @@ function AddModal({ isOpen, onRequestClose, onSave, defaultTab }) {
 
         if (!title.trim()) {
             alert("제목을 입력하세요.");
+            return;
+        }
+
+        if (endDate < startDate) {
+            alert("종료 시간은 시작 시간보다 빠를 수 없습니다.");
+            return;
         }
 
         const formatDateTime = (date) => {

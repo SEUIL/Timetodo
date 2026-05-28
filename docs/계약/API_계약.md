@@ -8,6 +8,18 @@
 - 인증이 필요한 API에서 session이 없으면 `401 Unauthorized`를 반환한다.
 - 다른 사용자의 리소스에 접근하면 service owner 검증에서 `403 Forbidden`을 반환한다.
 - 날짜/시간 형식은 `yyyy-MM-dd'T'HH:mm:ss` 형태의 `LocalDateTime` 문자열을 사용한다.
+- validation 실패와 application 예외는 공통 error response 형식을 사용한다.
+
+Error response:
+
+```json
+{
+  "status": 400,
+  "message": "요청 값이 올바르지 않습니다.",
+  "errors": ["title: 할 일 제목은 필수입니다."],
+  "timestamp": "2026-05-28T17:00:00"
+}
+```
 
 ## 인증
 
@@ -93,7 +105,7 @@ Logout successful
 ### 생성
 
 ```http
-POST /api/categories/add
+POST /api/categories
 Content-Type: application/json
 ```
 
@@ -119,7 +131,7 @@ Response `200`:
 ### 목록
 
 ```http
-GET /api/categories/all
+GET /api/categories
 ```
 
 Response `200`:
@@ -137,7 +149,7 @@ Response `200`:
 ### 수정
 
 ```http
-PUT /api/categories/update/{categoryId}
+PUT /api/categories/{categoryId}
 Content-Type: application/json
 ```
 
@@ -153,14 +165,23 @@ Request:
 ### 삭제
 
 ```http
-DELETE /api/categories/delete/{categoryId}
+DELETE /api/categories/{categoryId}
 ```
 
-Response `200`:
+Response `204`: body 없음
 
-```text
-카테고리 삭제 성공
+### 이름 검색
+
+```http
+GET /api/categories/search?categoryName=개발
 ```
+
+Legacy path:
+
+- `POST /api/categories/add`
+- `GET /api/categories/all`
+- `PUT /api/categories/update/{categoryId}`
+- `DELETE /api/categories/delete/{categoryId}`
 
 ## Task
 
@@ -303,6 +324,31 @@ DELETE /api/calendars/{calendarId}
 
 Response `204`: body 없음
 
+### 검색
+
+```http
+GET /api/calendars/search?title=회의&description=공유&categoryId=1&startTime=2026-05-28T10:00:00
+```
+
+Response `200`:
+
+```json
+[
+  {
+    "calendarId": 1,
+    "title": "회의",
+    "description": "프로젝트 진행 상황 공유",
+    "startTime": "2026-05-28T10:00:00",
+    "end_time": "2026-05-28T11:00:00",
+    "location": "온라인",
+    "repeatType": "반복 없음",
+    "userId": 1,
+    "categoryId": 1,
+    "reminderIds": []
+  }
+]
+```
+
 ## AI
 
 ### 자연어 입력 처리
@@ -327,4 +373,4 @@ Response `200`:
 주의:
 
 - OpenAI API key가 없거나 호출이 실패하면 `OpenAIAPI_SelectProcessing 실행 실패` 또는 처리 실패 메시지가 반환될 수 있다.
-- AI가 생성하는 Task/Calendar는 현재 기본 category ID `1`을 사용한다. 이 부분은 다음 개선 대상이다.
+- AI가 생성하는 Task/Calendar는 사용자별 `AI 기본-{userId}` category를 조회하거나 자동 생성해서 사용한다.

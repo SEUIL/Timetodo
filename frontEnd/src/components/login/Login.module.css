@@ -150,6 +150,13 @@ input[type="password"]:focus::placeholder {
     background-color: #0056b3;
 }
 
+.errorMessage {
+    margin: 2px 0 8px;
+    color: #d32f2f;
+    font-size: 13px;
+    font-weight: 600;
+}
+
 /* 회원가입 링크 */
 
 .signupLink {

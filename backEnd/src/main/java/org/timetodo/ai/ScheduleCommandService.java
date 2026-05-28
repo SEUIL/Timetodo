@@ -9,6 +9,7 @@ import org.timetodo.dto.ReminderRequestDto;
 import org.timetodo.dto.TaskDto;
 import org.timetodo.dto.TaskRequestDto;
 import org.timetodo.service.CalendarService;
+import org.timetodo.service.CategoryService;
 import org.timetodo.service.ReminderService;
 import org.timetodo.service.TaskService;
 
@@ -21,11 +22,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ScheduleCommandService {
 
-    private static final Long DEFAULT_CATEGORY_ID = 1L;
-
     private final CalendarService calendarService;
     private final TaskService taskService;
     private final ReminderService reminderService;
+    private final CategoryService categoryService;
 
     public String createCalendar(Map<String, Object> data, Long userId) {
         try {
@@ -41,7 +41,7 @@ public class ScheduleCommandService {
             requestDto.setStartTime(startTime);
             requestDto.setEndTime(endTime);
 
-            calendarService.addCalendar(requestDto, userId, DEFAULT_CATEGORY_ID);
+            calendarService.addCalendar(requestDto, userId, categoryService.getOrCreateAiDefaultCategoryId(userId));
             return "일정이 성공적으로 생성되었습니다.";
         } catch (Exception e) {
             log.error("handleCalendar 처리 중 오류 발생: {}", data, e);
@@ -58,7 +58,7 @@ public class ScheduleCommandService {
             requestDto.setRepeatType(safeGet(data, "repeatType", "NONE"));
             requestDto.setDueDate(LocalDateTime.parse(safeGet(data, "dueDate", null)));
 
-            taskService.addTask(requestDto, userId, DEFAULT_CATEGORY_ID);
+            taskService.addTask(requestDto, userId, categoryService.getOrCreateAiDefaultCategoryId(userId));
             return "할 일이 성공적으로 생성되었습니다.";
         } catch (Exception e) {
             log.error("handleTask 처리 중 오류 발생: {}", data, e);
